@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">foodyPet</string>
+    <string name="hint_id">아이디를 입력하세요.</string>
+    <string name="hint_pwd">비밀번호를 입력하세요.</string>
+    <string name="btn_signup"><u>회원가입하기</u></string>
+    <string name="btn_login">로그인</string>
+    <string name="intro">반려동물 식단 맞춤 서비스</string>
 </resources>
