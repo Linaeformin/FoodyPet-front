@@ -29,7 +29,7 @@ class LoginActivity : AppCompatActivity() {
         // TODO : 로그인 API 연결
         binding.loginBtn.setOnClickListener {
             // TODO : accessToken 및 refreshToken Intent에 담아서 전달
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, SplashActivity::class.java)
             startActivity(intent)
         }
     }
