@@ -5,4 +5,14 @@
     <string name="btn_signup"><u>회원가입하기</u></string>
     <string name="btn_login">로그인</string>
     <string name="intro">반려동물 식단 맞춤 서비스</string>
+    <string name="id">아이디</string>
+    <string name="pwd">비밀번호</string>
+    <string name="check_pwd">비밀번호 확인</string>
+    <string name="duplication">중복확인</string>
+    <string name="check_id">아이디는 7자 이상, 15자 이하여야해요.</string>
+    <string name="available_id">사용 가능한 아이디예요.</string>
+    <string name="unavailable_id">중복된 아이디예요</string>
+    <string name="unavailable_pwd">비밀번호는 영문과 숫자 7자리 이상이어야해요.</string>
+    <string name="unavailable_check_pwd">비밀번호가 일치하지 않아요.</string>
+    <string name="signup">회원가입</string>
 </resources>
