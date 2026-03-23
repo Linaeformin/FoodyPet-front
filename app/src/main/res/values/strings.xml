@@ -15,4 +15,7 @@
     <string name="unavailable_pwd">비밀번호는 영문과 숫자 7자리 이상이어야해요.</string>
     <string name="unavailable_check_pwd">비밀번호가 일치하지 않아요.</string>
     <string name="signup">회원가입</string>
+    <string name="home">홈</string>
+    <string name="community">커뮤니티</string>
+    <string name="mypqge">마이페이지</string>
 </resources>
