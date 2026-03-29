@@ -18,4 +18,16 @@
     <string name="home">홈</string>
     <string name="community">커뮤니티</string>
     <string name="mypqge">마이페이지</string>
+    <string name="no_pet">등록된 반려동물이 없어요.</string>
+    <string name="assign_pet">반려동물 등록하기</string>
+    <string name="pet_value">랑이</string>
+    <string name="pet_food">의 바로 식단</string>
+    <string name="oo">OO</string>
+    <string name="pet_food_diary">의 밥 일기</string>
+    <string name="notice_food_diary">반려동물 등록이 완료된 후&#10;확인할 수 있어요.</string>
+    <string name="pet_name">이름 :</string>
+    <string name="write_diary">본식 기록하기</string>
+    <string name="all_food">식단 전체보기</string>
+    <string name="make_food">오늘의 식단 만들기</string>
+    <string name="time">12:00</string>
 </resources>

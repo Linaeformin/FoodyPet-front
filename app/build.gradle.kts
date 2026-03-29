@@ -48,3 +48,4 @@ dependencies {
     implementation(libs.material)
     implementation("androidx.fragment:fragment-ktx:1.8.9")
 }
+

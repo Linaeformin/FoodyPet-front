@@ -1,17 +1,607 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="@color/white">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="홈 화면"
-        android:textSize="24sp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/home_top_bar_cl"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/home_logo_iv"
+            android:layout_width="110dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:src="@drawable/logo_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/home_archive_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="20dp"
+            android:src="@drawable/icon_box"
+            app:layout_constraintEnd_toStartOf="@id/home_alarm_iv"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/home_alarm_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="24dp"
+            android:src="@drawable/icon_alarm"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 상단 아래부터 스크롤 -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/home_scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        app:layout_constraintTop_toBottomOf="@id/home_top_bar_cl"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/home_scroll_content_cl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/home_pet_section_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="24dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- 반려동물 미등록 카드 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/home_pet_empty_cv"
+                android:layout_width="0dp"
+                android:layout_height="210dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:strokeColor="@color/regular_orange"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:id="@+id/home_pet_empty_container_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/home_pet_empty_message_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/scdream_light"
+                        android:text="등록된 반려동물이 없어요."
+                        android:textColor="@color/black"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/home_pet_register_btn"
+                        android:layout_width="148dp"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_assign_pet"
+                        android:fontFamily="@font/scdream_medium"
+                        android:gravity="center"
+                        android:text="반려동물 등록하기"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 반려동물 등록 카드 뷰페이저 -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/home_pet_view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="210dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"  />
+
+            <!-- 페이지 인디케이터 -->
+            <LinearLayout
+                android:id="@+id/home_indicator_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/home_pet_view_pager"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- OO의 바로 식단 -->
+    <TextView
+        android:id="@+id/home_quick_meal_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="28dp"
+        android:fontFamily="@font/scdream_medium"
+        android:text="@string/oo"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/home_pet_section_container" />
+
+    <TextView
+        android:id="@+id/home_quick_meal_sub_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/scdream_medium"
+        android:text="@string/pet_food"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@id/home_quick_meal_title_tv"
+        app:layout_constraintStart_toEndOf="@id/home_quick_meal_title_tv" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/home_quick_meal_registered_cv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="24dp"
+                android:visibility="visible"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/light_orange"
+                app:strokeWidth="1dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/home_quick_meal_title_tv">
+
+                <LinearLayout
+                    android:id="@+id/home_quick_meal_container_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="16dp"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp">
+
+                    <TextView
+                        android:id="@+id/home_quick_meal_time_tv"
+                        android:layout_width="64dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_home_meal_time"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:text="13:00"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/home_quick_meal_content_tv"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="24dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/scdream_light"
+                        android:gravity="center_vertical"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="4dp"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:id="@+id/home_btn_all_food_ll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/home_quick_meal_registered_cv"
+        android:layout_marginEnd="24dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/all_food"
+            android:textSize="12sp"
+            android:fontFamily="@font/scdream_light"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/black"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/btn_arrow_right"
+            android:layout_marginTop="18dp"
+            android:layout_marginStart="8dp"/>
+
+    </LinearLayout>
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/home_quick_meal_empty_cv"
+        android:layout_width="0dp"
+        android:layout_height="82dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="22dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#F4D2B8"
+        app:strokeWidth="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/home_btn_all_food_ll">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_plus"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/home_make_today_meal_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="오늘의 식단 만들기"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:fontFamily="@font/scdream_medium" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/home_quick_meal_bottom_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="home_quick_meal_registered_cv,home_quick_meal_empty_cv" />
+
+    <!-- OO의 밥 일기 -->
+    <TextView
+        android:id="@+id/home_food_diary_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="34dp"
+        android:fontFamily="@font/scdream_medium"
+        android:text="@string/oo"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/home_quick_meal_bottom_barrier" />
+
+    <TextView
+        android:id="@+id/home_food_diary_sub_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/scdream_medium"
+        android:text="@string/pet_food_diary"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@id/home_food_diary_title_tv"
+        app:layout_constraintStart_toEndOf="@id/home_food_diary_title_tv" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/home_food_diary_cv"
+        android:layout_width="0dp"
+        android:layout_height="260dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        app:cardBackgroundColor="#FFF9F5"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/home_food_diary_title_tv"
+        app:strokeColor="@color/main"
+        app:strokeWidth="2dp">
+
+        <LinearLayout
+            android:id="@+id/home_food_diary_container_ll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top|center_horizontal"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingTop="28dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="20dp">
+
+            <LinearLayout
+                android:id="@+id/home_food_diary_top_row_ll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/home_food_diary_medicine_cv"
+                    android:layout_width="86dp"
+                    android:layout_height="80dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/regular_orange"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/home_food_diary_medicine_iv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/icon_capsule"
+                            tools:ignore="ContentDescription" />
+
+                        <TextView
+                            android:id="@+id/home_food_diary_medicine_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text=""
+                            android:fontFamily="@font/scdream_light"
+                            android:textColor="@color/black"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <View
+                    android:layout_width="16dp"
+                    android:layout_height="1dp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/home_food_diary_water_cv"
+                    android:layout_width="110dp"
+                    android:layout_height="80dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/regular_orange"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/home_food_diary_water_iv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/icon_water"
+                            tools:ignore="ContentDescription" />
+
+                        <TextView
+                            android:id="@+id/home_food_diary_water_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text=""
+                            android:fontFamily="@font/scdream_light"
+                            android:textColor="@color/black"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <View
+                    android:layout_width="16dp"
+                    android:layout_height="1dp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/home_food_diary_snack_cv"
+                    android:layout_width="86dp"
+                    android:layout_height="80dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/regular_orange"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/home_food_diary_snack_iv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/icon_snack"
+                            tools:ignore="ContentDescription" />
+
+                        <TextView
+                            android:id="@+id/home_food_diary_snack_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text=""
+                            android:fontFamily="@font/scdream_light"
+                            android:textColor="@color/black"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/home_food_diary_bottom_row_ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="120dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/home_food_diary_meal_cv"
+                android:layout_width="150dp"
+                android:layout_height="110dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/regular_orange"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/home_food_diary_meal_iv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/icon_food"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/home_food_diary_meal_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text=""
+                        android:fontFamily="@font/scdream_light"
+                        android:textColor="@color/black"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="1dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/home_food_diary_record_cv"
+                android:layout_width="150dp"
+                android:layout_height="110dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/regular_orange"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/home_food_diary_record_iv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/icon_plus_circle_spot"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/home_food_diary_record_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/write_diary"
+                        android:fontFamily="@font/scdream_light"
+                        android:textColor="@color/black"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 잠금 오버레이 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/home_locked_overlay_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#66FFFFFF"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/home_quick_meal_title_tv"
+        app:layout_constraintBottom_toBottomOf="@id/home_food_diary_cv"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/home_locked_message_iv"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:fontFamily="@font/scdream_medium"
+            android:gravity="center"
+            android:src="@drawable/icon_locker"
+            android:lineSpacingExtra="4dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/home_locked_message_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/scdream_medium"
+            android:gravity="center"
+            android:text="반려동물 등록이 완료된 후&#10;확인할 수 있어요."
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/home_locked_message_iv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
