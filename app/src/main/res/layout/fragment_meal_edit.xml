@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -7,6 +8,7 @@
 
     <!-- 상단 고정 영역 -->
     <LinearLayout
+        android:id="@+id/top_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -34,100 +36,118 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:fontFamily="@font/scdream_medium"
-                android:text="전체 식단"
-                android:textColor="#111111"
+                android:text="식단 수정하기"
+                android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
         </RelativeLayout>
 
-        <!-- 이름 / 날짜 -->
+        <!-- 이름 / 날짜 / 시간 불러오기 -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="44dp">
+
+            <LinearLayout
+                android:id="@+id/meal_info_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/meal_owner_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/scdream_medium"
+                    android:text="랑이의 식단"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/meal_date_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_gravity="bottom"
+                    android:fontFamily="@font/scdream_light"
+                    android:text="2026.03.30"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </RelativeLayout>
+
         <LinearLayout
+            android:id="@+id/time_toggle_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
+            android:layout_gravity="right"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/meal_owner_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/scdream_medium"
-                android:text="랑이의 식단"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/time_toggle_iv"
+                android:layout_width="36dp"
+                android:layout_height="20dp"
+                android:src="@drawable/icon_toggle_apply"
+                android:contentDescription="시간 불러오기 토글" />
 
             <TextView
-                android:id="@+id/meal_date_tv"
+                android:id="@+id/time_toggle_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_gravity="bottom"
+                android:layout_marginStart="8dp"
                 android:fontFamily="@font/scdream_light"
-                android:text="2026.03.30"
-                android:textColor="@color/dark_gray"
-                android:textSize="12sp" />
+                android:text="시간 불러오기"
+                android:textColor="@color/black"
+                android:textSize="13sp" />
         </LinearLayout>
+    </LinearLayout>
 
-        <!-- 탭 고정 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="470dp"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/meal_view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="430dp"
+            android:clipToPadding="false"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp" />
+
         <LinearLayout
-            android:id="@+id/meal_tab_container_ll"
-            android:layout_width="194dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/meal_unfed_tab_tv"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/bg_meal_tab_selected"
-                android:fontFamily="@font/scdream_medium"
-                android:gravity="center"
-                android:text="미급여"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/meal_fed_tab_tv"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:background="@drawable/bg_meal_tab_unselected"
-                android:fontFamily="@font/scdream_light"
-                android:gravity="center"
-                android:text="급여"
-                android:textColor="@color/black"
-                android:textSize="14sp" />
-        </LinearLayout>
+            android:id="@+id/indicator_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal" />
 
     </LinearLayout>
 
-    <!-- 리스트만 스크롤 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/meal_list_rv"
+    <!-- 빈 공간 -->
+    <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:paddingBottom="16dp"
-        android:layout_marginTop="8dp"
-        android:scrollbars="none" />
+        android:layout_weight="1" />
 
     <!-- 하단 버튼 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:gravity="bottom"
         android:paddingStart="24dp"
         android:paddingTop="18dp"
         android:paddingEnd="24dp"
-        android:paddingBottom="17dp">
+        android:paddingBottom="24dp">
 
         <TextView
             android:id="@+id/btn_edit_analyze"

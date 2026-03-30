@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tv_dropdown_food"
+    android:layout_width="match_parent"
+    android:layout_height="32dp"
+    android:background="@drawable/bg_bottom_line"
+    android:gravity="center_vertical"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:textColor="@color/black"
+    android:textSize="13sp"
+    android:fontFamily="@font/scdream_light"
+    android:singleLine="true"
+    android:ellipsize="end" />

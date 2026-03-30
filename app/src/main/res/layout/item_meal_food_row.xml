@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:orientation="horizontal">
+
+    <!-- 품목 입력 -->
+    <AutoCompleteTextView
+        android:id="@+id/food_name_actv"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_bottom_line"
+        android:popupBackground="@drawable/bg_food_search_popup"
+        android:dropDownVerticalOffset="2dp"
+        android:dropDownWidth="wrap_content"
+        android:completionThreshold="1"
+        android:fontFamily="@font/scdream_light"
+        android:hint="먹일 품목을 입력하세요"
+        android:inputType="text"
+        android:singleLine="true"
+        android:textColor="@color/black"
+        android:textColorHint="@color/light_gray"
+        android:textSize="13sp" />
+
+    <!-- 수량 -->
+    <EditText
+        android:id="@+id/food_amount_et"
+        android:layout_width="52dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="12dp"
+        android:ems="3"
+        android:fontFamily="@font/scdream_light"
+        android:gravity="center"
+        android:imeOptions="actionNext"
+        android:inputType="numberDecimal"
+        android:maxLines="1"
+        android:background="@drawable/bg_bottom_line"
+        android:textColor="@color/black"
+        android:textSize="13sp" />
+
+    <!-- 단위 dropdown -->
+    <AutoCompleteTextView
+        android:id="@+id/unit_dropdown_actv"
+        android:layout_width="50dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/bg_unit_dropdown"
+        android:popupBackground="@drawable/bg_dropdown_popup"
+        android:dropDownVerticalOffset="4dp"
+        android:drawableEnd="@drawable/btn_arrow_bottom"
+        android:drawablePadding="4dp"
+        android:focusable="false"
+        android:clickable="true"
+        android:fontFamily="@font/scdream_medium"
+        android:gravity="center"
+        android:inputType="none"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:text="g"
+        android:textColor="@color/black"
+        android:textSize="13sp" />
+
+</LinearLayout>

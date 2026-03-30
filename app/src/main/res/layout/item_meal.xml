@@ -9,7 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
         android:background="@drawable/bg_item_meal"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -18,24 +17,21 @@
         android:paddingVertical="16dp"
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
-        app:cardCornerRadius="22dp"
-        app:cardElevation="0dp"
-        app:strokeColor="@color/light_orange"
-        app:strokeWidth="1dp"
-        android:layout_marginTop="8dp">
+        android:layout_marginBottom="8dp">
 
         <TextView
             android:id="@+id/quick_meal_time_tv"
             android:layout_width="64dp"
             android:layout_height="28dp"
             android:layout_marginStart="8dp"
+            android:layout_gravity="top"
             android:background="@drawable/bg_home_meal_time"
             android:gravity="center"
             android:includeFontPadding="false"
             android:text="13:00"
             android:textColor="@color/white"
             android:textSize="14sp"
-            android:textStyle="bold" />
+            android:fontFamily="@font/scdream_medium"/>
 
         <TextView
             android:id="@+id/quick_meal_content_tv"
@@ -44,9 +40,12 @@
             android:layout_marginStart="24dp"
             android:layout_weight="1"
             android:fontFamily="@font/scdream_light"
-            android:gravity="center_vertical"
-            android:includeFontPadding="false"
-            android:lineSpacingExtra="4dp"
+            android:gravity="center_horizontal"
+            android:textAlignment="center"
+            android:includeFontPadding="true"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:lineSpacingExtra="6dp"
             android:textColor="@color/black"
             android:textSize="14sp" />
     </LinearLayout>

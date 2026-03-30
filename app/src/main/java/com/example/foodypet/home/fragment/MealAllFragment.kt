@@ -77,12 +77,14 @@ class MealAllFragment : Fragment() {
             MealItem(
                 mealId = 6L,
                 time = "12:00",
-                content = "플라그오프, 뉴로액트",
+                content = "-",
                 isFed = false
             )
         )
 
         setMealData(mockMealList)
+        moveMealEditFragment()
+
     }
 
     private fun initView() {
@@ -160,11 +162,11 @@ class MealAllFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.mealEditTv.setOnClickListener {
+        binding.btnEditAnalyze.setOnClickListener {
             // 식단 수정 화면 이동
         }
 
-        binding.mealRecommendTv.setOnClickListener {
+        binding.btnOnlyAnalyze.setOnClickListener {
             // 이후 식단 추천 받기 화면 이동
         }
     }
@@ -191,6 +193,12 @@ class MealAllFragment : Fragment() {
         setMealData(responseMealList)
     }
 
+    fun updateEditBtn(writeable: Boolean) {
+        if (writeable) {
+            binding.btnEditAnalyze.text = "식단 계속 작성하기"
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -198,5 +206,14 @@ class MealAllFragment : Fragment() {
 
     private enum class MealTabType {
         UNFED, FED
+    }
+
+    private fun moveMealEditFragment() {
+        binding.btnEditAnalyze.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, MealEditFragment())
+                .addToBackStack(null)
+                .commit()
+        }
     }
 }
