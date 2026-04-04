@@ -6,7 +6,6 @@
     android:orientation="vertical"
     android:background="@color/white">
 
-    <!-- 상단 고정 영역 -->
     <LinearLayout
         android:id="@+id/top_area"
         android:layout_width="match_parent"
@@ -16,7 +15,6 @@
         android:paddingTop="24dp"
         android:paddingEnd="24dp">
 
-        <!-- 상단 헤더 -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -36,12 +34,11 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:fontFamily="@font/scdream_bold"
-                android:text="식단 수정하기"
+                android:text="식단 입력하기"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
         </RelativeLayout>
 
-        <!-- 이름 / 날짜 / 시간 불러오기 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -81,7 +78,6 @@
                 android:id="@+id/time_toggle_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -103,8 +99,6 @@
                     android:textSize="13sp" />
             </LinearLayout>
         </LinearLayout>
-
-
     </LinearLayout>
 
     <LinearLayout
@@ -133,7 +127,6 @@
             android:orientation="horizontal" />
     </LinearLayout>
 
-    <!-- 하단 버튼 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -152,11 +145,10 @@
             android:background="@drawable/bg_orange_fill_16"
             android:fontFamily="@font/scdream_light"
             android:gravity="center"
-            android:text="수정 및 분석하기"
+            android:text="저장 및 분석하기"
             android:textColor="@color/black"
             android:textSize="18sp" />
 
-        <!-- analyze 버튼만 shadow 적용 -->
         <FrameLayout
             android:layout_width="280dp"
             android:layout_height="64dp"

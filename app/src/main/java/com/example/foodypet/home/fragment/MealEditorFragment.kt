@@ -5,22 +5,29 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.example.foodypet.R
-import com.example.foodypet.databinding.FragmentMealEditBinding
+import com.example.foodypet.databinding.FragmentMealEditorBinding
 import com.example.foodypet.home.adapter.MealPagerAdapter
 import com.example.foodypet.home.model.FoodUiModel
 import com.example.foodypet.home.model.MealPageUiModel
 
-class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
+class MealEditorFragment : Fragment(R.layout.fragment_meal_editor) {
 
-    private var _binding: FragmentMealEditBinding? = null
+    private var _binding: FragmentMealEditorBinding? = null
     private val binding get() = _binding!!
 
     private var isTimeMode = true
     private var currentPage = 0
     private var pageChangeCallback: ViewPager2.OnPageChangeCallback? = null
+
+    private val editorMode: MealEditorMode
+        get() {
+            val modeName = arguments?.getString(ARG_EDITOR_MODE) ?: MealEditorMode.CREATE.name
+            return MealEditorMode.valueOf(modeName)
+        }
 
     private val dummyInventory = listOf(
         "도란도란 단호박",
@@ -35,13 +42,23 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentMealEditBinding.bind(view)
+        _binding = FragmentMealEditorBinding.bind(view)
 
+        applyModeUi()
         initHeader()
         initPagerCallback()
         setupPager(isTimeMode, currentPage)
+        binding.mealViewPager.isUserInputEnabled = true
         back()
-        moveAnalyze()
+        initClickListeners()
+        loadInitialData()
+    }
+
+    private fun applyModeUi() {
+        binding.mealTitleTv.text = when (editorMode) {
+            MealEditorMode.CREATE -> "식단 직접 등록하기"
+            MealEditorMode.EDIT -> "식단 수정하기"
+        }
     }
 
     private fun initHeader() {
@@ -49,7 +66,6 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
 
         binding.timeToggleIv.setOnClickListener {
             currentPage = binding.mealViewPager.currentItem
-
             isTimeMode = !isTimeMode
             updateToggleImage()
             setupPager(isTimeMode, currentPage)
@@ -70,7 +86,7 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
                 super.onPageSelected(position)
                 currentPage = position
                 updateIndicator(position)
-                updateBottomButtonText(position)   // 추가
+                updateBottomButtonText(position)
             }
         }
 
@@ -110,15 +126,79 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
         binding.mealViewPager.setCurrentItem(safePosition, false)
         currentPage = safePosition
         updateIndicator(safePosition)
-        updateBottomButtonText(safePosition)   // 추가
+        updateBottomButtonText(safePosition)
     }
 
     private fun updateBottomButtonText(position: Int) {
         val lastIndex = (binding.mealViewPager.adapter?.itemCount ?: 0) - 1
+        val isLast = position == lastIndex
 
-        binding.btnEditAnalyze.text =
-            if (position == lastIndex) "수정 및 분석하기"
-            else "수정 완료"
+        binding.btnEditAnalyze.text = when {
+            isLast && editorMode == MealEditorMode.CREATE -> "저장 및 분석하기"
+            isLast && editorMode == MealEditorMode.EDIT -> "수정 및 분석하기"
+            !isLast && editorMode == MealEditorMode.CREATE -> "저장 완료"
+            else -> "수정 완료"
+        }
+    }
+
+    private fun initClickListeners() {
+        binding.btnEditAnalyze.setOnClickListener {
+            if (isLastPage()) {
+                when (editorMode) {
+                    MealEditorMode.CREATE -> createMeal()
+                    MealEditorMode.EDIT -> updateMeal()
+                }
+                moveToAnalyze()
+            } else {
+                when (editorMode) {
+                    MealEditorMode.CREATE -> saveDraftPage()
+                    MealEditorMode.EDIT -> saveEditedPage()
+                }
+            }
+        }
+
+        binding.btnOnlyAnalyze.setOnClickListener {
+            moveToAnalyze()
+        }
+    }
+
+    private fun createMeal() {
+        // TODO: 직접 등록 API 호출
+    }
+
+    private fun updateMeal() {
+        // TODO: 수정 API 호출
+    }
+
+    private fun saveDraftPage() {
+        // TODO: 등록 중간 저장 or 로컬 상태 저장
+    }
+
+    private fun saveEditedPage() {
+        // TODO: 수정 중간 저장 or 로컬 상태 저장
+    }
+
+    private fun moveToAnalyze() {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, AnalyzeMealFragment())
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun isLastPage(): Boolean {
+        val lastIndex = (binding.mealViewPager.adapter?.itemCount ?: 0) - 1
+        return binding.mealViewPager.currentItem == lastIndex
+    }
+
+    private fun loadInitialData() {
+        when (editorMode) {
+            MealEditorMode.CREATE -> {
+                // 빈 데이터 세팅
+            }
+            MealEditorMode.EDIT -> {
+                // TODO: 기존 저장 식단 조회 후 prefill
+            }
+        }
     }
 
     private fun dummyFoods(): List<FoodUiModel> {
@@ -177,28 +257,17 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
         super.onDestroyView()
     }
 
-    private fun moveAnalyze() {
-        binding.btnEditAnalyze.setOnClickListener {
-            if (isLastPage()) {
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, AnalyzeMealFragment())
-                    .addToBackStack(null)
-                    .commit()
-            } else {
-                // 수정 완료만 처리하고 이동은 안 함
-                // 필요하면 여기서 저장 로직 추가
+    companion object {
+        private const val ARG_EDITOR_MODE = "editor_mode"
+
+        fun newInstance(mode: MealEditorMode): MealEditorFragment {
+            return MealEditorFragment().apply {
+                arguments = bundleOf(ARG_EDITOR_MODE to mode.name)
             }
         }
-        binding.btnOnlyAnalyze.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, AnalyzeMealFragment())
-                .addToBackStack(null)
-                .commit()
-        }
     }
+}
 
-    private fun isLastPage(): Boolean {
-        val lastIndex = (binding.mealViewPager.adapter?.itemCount ?: 0) - 1
-        return binding.mealViewPager.currentItem == lastIndex
-    }
+enum class MealEditorMode {
+    CREATE, EDIT
 }

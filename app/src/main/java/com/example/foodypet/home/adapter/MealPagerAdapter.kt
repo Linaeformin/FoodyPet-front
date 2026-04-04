@@ -13,19 +13,22 @@ class MealPagerAdapter(
     private val isTimeMode: Boolean
 ) : RecyclerView.Adapter<MealPagerAdapter.MealPageViewHolder>() {
 
-    inner class MealPageViewHolder(private val binding: ItemMealPageBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    inner class MealPageViewHolder(
+        private val binding: ItemMealPageBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(page: MealPageUiModel) {
             binding.pageTitleChipTv.text = page.label
 
-            val adapter = FoodRowAdapter(
-                items = page.foods.toMutableList(),
-                inventoryItems = inventoryItems
-            )
-
-            binding.foodRecyclerView.layoutManager = LinearLayoutManager(binding.root.context)
-            binding.foodRecyclerView.adapter = adapter
+            if (binding.foodRecyclerView.adapter == null) {
+                binding.foodRecyclerView.layoutManager = LinearLayoutManager(binding.root.context)
+                binding.foodRecyclerView.itemAnimator = null
+                binding.foodRecyclerView.isNestedScrollingEnabled = false
+                binding.foodRecyclerView.adapter = FoodRowAdapter(
+                    items = page.foods.toMutableList(),
+                    inventoryItems = inventoryItems
+                )
+            }
         }
     }
 

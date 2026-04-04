@@ -211,7 +211,7 @@ class MealAllFragment : Fragment() {
     private fun moveMealEditFragment() {
         binding.btnEditAnalyze.setOnClickListener {
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, MealEditFragment())
+                .replace(R.id.fragment_container, MealEditorFragment.newInstance(MealEditorMode.EDIT))
                 .addToBackStack(null)
                 .commit()
         }
