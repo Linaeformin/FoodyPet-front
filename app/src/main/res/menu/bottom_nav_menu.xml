@@ -4,16 +4,15 @@
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/icon_home"
-        android:title="@string/home" />
+        android:title="" />
 
     <item
         android:id="@+id/nav_search"
         android:icon="@drawable/icon_community"
-        android:title="@string/community" />
+        android:title="" />
 
     <item
         android:id="@+id/nav_mypage"
         android:icon="@drawable/icon_mypage"
-        android:title="@string/mypqge" />
-
+        android:title="" />
 </menu>

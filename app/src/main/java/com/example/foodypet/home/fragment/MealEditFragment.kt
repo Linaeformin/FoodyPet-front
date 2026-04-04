@@ -46,6 +46,7 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
         initPagerCallback()
         setupPager(isTimeMode, currentPage)
         back()
+        moveAnalyze()
     }
 
     private fun initHeader() {
@@ -170,4 +171,14 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
         _binding = null
         super.onDestroyView()
     }
+
+    private fun moveAnalyze(){
+        binding.btnEditAnalyze.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, AnalyzeMealFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
 }
