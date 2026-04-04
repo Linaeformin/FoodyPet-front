@@ -271,18 +271,7 @@ class HomeFragment : Fragment() {
 
     private fun moveRecommendFragment() {
         binding.homeQuickMealEmptyCv.setOnClickListener {
-            if (petList.isEmpty()) return@setOnClickListener
-
-            val currentPet = petList[currentPetPosition]
-            val isMealEmpty =
-                currentPet.mealTime.isNullOrBlank() && currentPet.mealContent.isNullOrBlank()
-
-            if (isMealEmpty) {
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, MealRecommendFragment())
-                    .addToBackStack(null)
-                    .commit()
-            }
+            showDietRegisterDialog()
         }
     }
 
@@ -299,5 +288,41 @@ class HomeFragment : Fragment() {
 
     companion object {
         private const val KEY_CURRENT_PET_POSITION = "current_pet_position"
+    }
+
+    private fun showDietRegisterDialog() {
+        val dialog = DietRegisterDialogFragment()
+
+        dialog.setOnRecommendClickListener {
+            if (petList.isEmpty()) return@setOnRecommendClickListener
+
+            val currentPet = petList[currentPetPosition]
+            val isMealEmpty =
+                currentPet.mealTime.isNullOrBlank() && currentPet.mealContent.isNullOrBlank()
+
+            if (isMealEmpty) {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, MealRecommendFragment())
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }
+
+        dialog.setOnDirectClickListener {
+            if (petList.isEmpty()) return@setOnDirectClickListener
+
+            val currentPet = petList[currentPetPosition]
+            val isMealEmpty =
+                currentPet.mealTime.isNullOrBlank() && currentPet.mealContent.isNullOrBlank()
+
+            if (isMealEmpty) {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, MealEditorFragment.newInstance(MealEditorMode.CREATE))
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }
+
+        dialog.show(parentFragmentManager, "DietRegisterDialog")
     }
 }
