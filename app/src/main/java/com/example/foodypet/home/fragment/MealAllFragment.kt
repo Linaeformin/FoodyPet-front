@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.foodypet.MealAdapter
+import com.example.foodypet.home.adapter.MealAdapter
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentMealAllBinding
 import com.example.foodypet.home.model.MealItem

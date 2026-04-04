@@ -10,8 +10,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.example.foodypet.R
-import com.example.foodypet.home.adapter.HomePetPagerAdapter
 import com.example.foodypet.databinding.FragmentHomeBinding
+import com.example.foodypet.home.adapter.HomePetPagerAdapter
 import com.example.foodypet.home.model.PetPagerItem
 
 class HomeFragment : Fragment() {
@@ -20,10 +20,12 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var petList: List<PetPagerItem>
+    private var currentPetPosition = 0
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
+            currentPetPosition = position
             setCurrentIndicator(position)
             updateCurrentPetUI(petList[position])
         }
@@ -40,6 +42,10 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        savedInstanceState?.let {
+            currentPetPosition = it.getInt(KEY_CURRENT_PET_POSITION, currentPetPosition)
+        }
 
         petList = listOf(
             PetPagerItem(
@@ -74,14 +80,19 @@ class HomeFragment : Fragment() {
             )
         )
 
-        // val isPetRegistered = false
         val isPetRegistered = petList.isNotEmpty()
 
         updatePetLockUI(isPetRegistered)
 
         if (isPetRegistered) {
+            if (currentPetPosition >= petList.size) {
+                currentPetPosition = 0
+            }
+
             updatePetSection(petList)
-            updateCurrentPetUI(petList[0])
+            binding.homePetViewPager.setCurrentItem(currentPetPosition, false)
+            setCurrentIndicator(currentPetPosition)
+            updateCurrentPetUI(petList[currentPetPosition])
         } else {
             updatePetSection(emptyList())
             updatePetName(null)
@@ -91,6 +102,7 @@ class HomeFragment : Fragment() {
         }
 
         moveMealAllFragment()
+        moveRecommendFragment()
     }
 
     private fun updatePetLockUI(isPetRegistered: Boolean) {
@@ -166,10 +178,12 @@ class HomeFragment : Fragment() {
         binding.homePetViewPager.adapter = adapter
 
         setupIndicators(petList.size)
-        setCurrentIndicator(0)
 
         binding.homePetViewPager.unregisterOnPageChangeCallback(pageChangeCallback)
         binding.homePetViewPager.registerOnPageChangeCallback(pageChangeCallback)
+
+        binding.homePetViewPager.setCurrentItem(currentPetPosition, false)
+        setCurrentIndicator(currentPetPosition)
     }
 
     private fun updateCurrentPetUI(pet: PetPagerItem) {
@@ -196,6 +210,13 @@ class HomeFragment : Fragment() {
     private fun clearMealText() {
         binding.homeQuickMealTimeTv.text = ""
         binding.homeQuickMealContentTv.text = ""
+    }
+
+    private fun clearFoodDiary() {
+        binding.homeFoodDiaryMedicineTv.text = ""
+        binding.homeFoodDiaryWaterTv.text = ""
+        binding.homeFoodDiarySnackTv.text = ""
+        binding.homeFoodDiaryMealTv.text = ""
     }
 
     private fun setupIndicators(count: Int) {
@@ -232,17 +253,42 @@ class HomeFragment : Fragment() {
             } else {
                 R.drawable.indicator_unselect
             }
+
             imageView.setImageDrawable(
                 ContextCompat.getDrawable(requireContext(), drawableId)
             )
         }
     }
 
-    private fun clearFoodDiary() {
-        binding.homeFoodDiaryMedicineTv.text = ""
-        binding.homeFoodDiaryWaterTv.text = ""
-        binding.homeFoodDiarySnackTv.text = ""
-        binding.homeFoodDiaryMealTv.text = ""
+    private fun moveMealAllFragment() {
+        binding.homeBtnAllFoodLl.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, MealAllFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
+    private fun moveRecommendFragment() {
+        binding.homeQuickMealEmptyCv.setOnClickListener {
+            if (petList.isEmpty()) return@setOnClickListener
+
+            val currentPet = petList[currentPetPosition]
+            val isMealEmpty =
+                currentPet.mealTime.isNullOrBlank() && currentPet.mealContent.isNullOrBlank()
+
+            if (isMealEmpty) {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, MealRecommendFragment())
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_CURRENT_PET_POSITION, currentPetPosition)
     }
 
     override fun onDestroyView() {
@@ -251,13 +297,7 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
     }
 
-    // HomeFragment -> MealAllFragment 이동
-    private fun moveMealAllFragment() {
-        binding.homeBtnAllFoodLl.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, MealAllFragment())
-                .addToBackStack(null)
-                .commit()
-        }
+    companion object {
+        private const val KEY_CURRENT_PET_POSITION = "current_pet_position"
     }
 }

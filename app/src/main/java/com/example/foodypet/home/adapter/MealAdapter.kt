@@ -1,6 +1,7 @@
-package com.example.foodypet
+package com.example.foodypet.home.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodypet.databinding.ItemMealBinding
@@ -36,6 +37,7 @@ class MealAdapter : RecyclerView.Adapter<MealAdapter.MealViewHolder>() {
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: MealItem) {
+            binding.quickMealTimeTv.visibility = View.VISIBLE
             binding.quickMealTimeTv.text = item.time
             binding.quickMealContentTv.text = item.content
         }
