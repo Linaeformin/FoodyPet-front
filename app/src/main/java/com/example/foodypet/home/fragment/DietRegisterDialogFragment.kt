@@ -30,13 +30,13 @@ class DietRegisterDialogFragment : DialogFragment() {
             dismiss()
         }
 
+        binding.btnClose.setOnClickListener {
+            dismiss()
+        }
+
         val dialog = AlertDialog.Builder(requireContext())
             .setView(binding.root)
             .create()
-
-        dialog.setOnDismissListener {
-            _binding = null
-        }
 
         return dialog
     }
