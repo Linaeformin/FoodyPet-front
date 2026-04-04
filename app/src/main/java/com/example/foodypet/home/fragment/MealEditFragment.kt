@@ -19,14 +19,9 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
     private val binding get() = _binding!!
 
     private var isTimeMode = true
-
-    // 현재 페이지 기억용
     private var currentPage = 0
-
-    // ViewPager 콜백 참조 저장
     private var pageChangeCallback: ViewPager2.OnPageChangeCallback? = null
 
-    // 서버 대신 더미 재고 목록
     private val dummyInventory = listOf(
         "도란도란 단호박",
         "도란도란",
@@ -75,6 +70,7 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
                 super.onPageSelected(position)
                 currentPage = position
                 updateIndicator(position)
+                updateBottomButtonText(position)   // 추가
             }
         }
 
@@ -114,6 +110,15 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
         binding.mealViewPager.setCurrentItem(safePosition, false)
         currentPage = safePosition
         updateIndicator(safePosition)
+        updateBottomButtonText(safePosition)   // 추가
+    }
+
+    private fun updateBottomButtonText(position: Int) {
+        val lastIndex = (binding.mealViewPager.adapter?.itemCount ?: 0) - 1
+
+        binding.btnEditAnalyze.text =
+            if (position == lastIndex) "수정 및 분석하기"
+            else "수정 완료"
     }
 
     private fun dummyFoods(): List<FoodUiModel> {
@@ -172,8 +177,19 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
         super.onDestroyView()
     }
 
-    private fun moveAnalyze(){
+    private fun moveAnalyze() {
         binding.btnEditAnalyze.setOnClickListener {
+            if (isLastPage()) {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, AnalyzeMealFragment())
+                    .addToBackStack(null)
+                    .commit()
+            } else {
+                // 수정 완료만 처리하고 이동은 안 함
+                // 필요하면 여기서 저장 로직 추가
+            }
+        }
+        binding.btnOnlyAnalyze.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, AnalyzeMealFragment())
                 .addToBackStack(null)
@@ -181,4 +197,8 @@ class MealEditFragment : Fragment(R.layout.fragment_meal_edit) {
         }
     }
 
+    private fun isLastPage(): Boolean {
+        val lastIndex = (binding.mealViewPager.adapter?.itemCount ?: 0) - 1
+        return binding.mealViewPager.currentItem == lastIndex
+    }
 }
