@@ -103,6 +103,7 @@ class HomeFragment : Fragment() {
 
         moveMealAllFragment()
         moveRecommendFragment()
+        moveNotification()
     }
 
     private fun updatePetLockUI(isPetRegistered: Boolean) {
@@ -324,5 +325,14 @@ class HomeFragment : Fragment() {
         }
 
         dialog.show(parentFragmentManager, "DietRegisterDialog")
+    }
+
+    private fun moveNotification() {
+        binding.homeAlarmIv.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, HomeNotificationFragment())
+                .addToBackStack(null)
+                .commit()
+        }
     }
 }
