@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/capsule_iv"
+    android:layout_width="45dp"
+    android:layout_height="45dp"
+    android:layout_marginEnd="14dp"
+    android:adjustViewBounds="true"
+    android:contentDescription="캡슐"
+    android:scaleType="fitCenter"
+    android:src="@drawable/icon_capsule_unselect" />

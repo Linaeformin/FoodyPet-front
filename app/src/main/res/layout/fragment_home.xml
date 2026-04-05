@@ -292,12 +292,12 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/home_quick_meal_bottom_barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="home_quick_meal_registered_cv,home_quick_meal_empty_cv" />
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/home_quick_meal_bottom_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="home_quick_meal_registered_cv,home_quick_meal_empty_cv" />
 
     <!-- OO의 밥 일기 -->
     <TextView
@@ -351,6 +351,44 @@
             android:paddingTop="28dp"
             android:paddingEnd="20dp"
             android:paddingBottom="20dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/home_locked_overlay_container"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="#66FFFFFF"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/home_locked_message_iv"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:fontFamily="@font/scdream_medium"
+                    android:gravity="center"
+                    android:lineSpacingExtra="4dp"
+                    android:src="@drawable/icon_locker"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/home_locked_message_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/scdream_medium"
+                    android:gravity="center"
+                    android:lineSpacingExtra="4dp"
+                    android:text="반려동물 등록이 완료된 후&#10;확인할 수 있어요."
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/home_locked_message_iv" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
                 android:id="@+id/home_food_diary_top_row_ll"
@@ -561,47 +599,6 @@
     </com.google.android.material.card.MaterialCardView>
 
     <!-- 잠금 오버레이 -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/home_locked_overlay_container"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#66FFFFFF"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="visible"
-        app:layout_constraintTop_toTopOf="@id/home_quick_meal_title_tv"
-        app:layout_constraintBottom_toBottomOf="@id/home_food_diary_cv"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-            android:id="@+id/home_locked_message_iv"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:fontFamily="@font/scdream_medium"
-            android:gravity="center"
-            android:src="@drawable/icon_locker"
-            android:lineSpacingExtra="4dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <TextView
-            android:id="@+id/home_locked_message_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/scdream_medium"
-            android:gravity="center"
-            android:text="반려동물 등록이 완료된 후&#10;확인할 수 있어요."
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:lineSpacingExtra="4dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/home_locked_message_iv"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

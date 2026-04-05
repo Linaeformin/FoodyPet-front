@@ -13,6 +13,7 @@ import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentHomeBinding
 import com.example.foodypet.home.adapter.HomePetPagerAdapter
 import com.example.foodypet.home.enum.DiaryMode
+import com.example.foodypet.home.model.NutritionUiModel
 import com.example.foodypet.home.model.PetPagerItem
 
 class HomeFragment : Fragment() {
@@ -108,6 +109,8 @@ class HomeFragment : Fragment() {
         moveDiary()
         moveDiaryList()
         popupSnack()
+        popupWater()
+        popupMedicine()
     }
 
     private fun updatePetLockUI(isPetRegistered: Boolean) {
@@ -364,4 +367,59 @@ class HomeFragment : Fragment() {
             dialog.show(parentFragmentManager, "SnackDialog")
         }
     }
+
+    private fun popupWater() {
+        binding.homeFoodDiaryWaterCv.setOnClickListener {
+            val dialog = WaterAmountDialog(requireContext()) { totalAmount, inputValues ->
+
+                // 합계 텍스트 반영
+                binding.homeFoodDiaryWaterTv.text = "${totalAmount}ml"
+
+                // TODO: 서버 저장이나 ViewModel 저장 필요하면 여기서 처리
+                // viewModel.saveWaterAmount(totalAmount, inputValues)
+            }
+
+            dialog.show()
+        }
+    }
+
+    private fun popupMedicine() {
+        binding.homeFoodDiaryMedicineCv.setOnClickListener {
+            val medicineList = arrayListOf(
+                NutritionUiModel(
+                    nutritionId = 1L,
+                    nutritionName = "유산균",
+                    requiredCount = 3,
+                    takenCount = 2
+                ),
+                NutritionUiModel(
+                    nutritionId = 2L,
+                    nutritionName = "오메가3",
+                    requiredCount = 2,
+                    takenCount = 1
+                ),
+                NutritionUiModel(
+                    nutritionId = 3L,
+                    nutritionName = "비타민D",
+                    requiredCount = 1,
+                    takenCount = 0
+                )
+            )
+
+            val dialog = NutritionDialogFragment(
+                nutritionList = medicineList,
+                onSaveClick = { updatedList ->
+                    updatedList.forEach {
+                        println("nutritionId=${it.nutritionId}, takenCount=${it.takenCount}")
+                    }
+
+                    // 여기서 서버 저장 API 호출
+                    // ex) viewModel.saveMedicine(updatedList)
+                }
+            )
+
+            dialog.show(parentFragmentManager, "MedicineDialog")
+        }
+    }
+
 }
