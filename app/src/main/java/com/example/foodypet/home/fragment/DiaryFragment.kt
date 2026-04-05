@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentDiaryBinding
 import com.example.foodypet.home.enum.DiaryMode
+import com.example.foodypet.home.model.MealItem
 
 class DiaryFragment : Fragment(R.layout.fragment_diary) {
 
@@ -75,6 +76,7 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         initSupplementInputs()
         initActionButton()
         applyModeUi()
+        openMealPop()
     }
 
     private fun initTopBar() {
@@ -466,7 +468,7 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
             Toast.makeText(requireContext(), "삭제하기 클릭", Toast.LENGTH_SHORT).show()
         }
 
-        popupWindow.showAsDropDown(binding.mealMoreIv, -dpToPx(160), dpToPx(8))
+        popupWindow.showAsDropDown(binding.mealMoreIv, -dpToPx(150), dpToPx(8))
     }
 
     private fun getDrawableCompat(drawableRes: Int): Drawable? {
@@ -493,4 +495,37 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         val name: String,
         val amount: Int
     )
+
+    private fun openMealPop() {
+
+        binding.putFoodIv.setOnClickListener {
+            val mealList = listOf(
+                MealItem(
+                    mealId = 1L,
+                    time = "08:30",
+                    content = "삶은 닭가슴살 30g, 브로콜리 10g, 단호박 20g",
+                    isFed = false
+                ),
+                MealItem(
+                    mealId = 2L,
+                    time = "13:00",
+                    content = "흑돼지 치즈볼 1개, 닭오돌뼈 10g, 플라그오프, 뉴로액트",
+                    isFed = false
+                ),
+                MealItem(
+                    mealId = 3L,
+                    time = "18:40",
+                    content = "연어 25g, 고구마 15g, 유산균, 오메가3",
+                    isFed = false
+                )
+            )
+
+            val dialog = MealLoadDialogFragment(mealList) { selectedMeal ->
+                binding.pageTitleChipTv.text = selectedMeal.time
+                binding.mealFoodListTv.text = selectedMeal.content
+            }
+
+            dialog.show(parentFragmentManager, "MealLoadDialog")
+        }
+    }
 }

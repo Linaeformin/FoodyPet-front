@@ -7,7 +7,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.foodypet.databinding.ItemMealBinding
 import com.example.foodypet.home.model.MealItem
 
-class MealAdapter : RecyclerView.Adapter<MealAdapter.MealViewHolder>() {
+class MealAdapter(
+    private val onItemClick: ((MealItem) -> Unit)? = null
+) : RecyclerView.Adapter<MealAdapter.MealViewHolder>() {
 
     private val itemList = mutableListOf<MealItem>()
 
@@ -40,6 +42,10 @@ class MealAdapter : RecyclerView.Adapter<MealAdapter.MealViewHolder>() {
             binding.quickMealTimeTv.visibility = View.VISIBLE
             binding.quickMealTimeTv.text = item.time
             binding.quickMealContentTv.text = item.content
+
+            binding.root.setOnClickListener {
+                onItemClick?.invoke(item)
+            }
         }
     }
 }

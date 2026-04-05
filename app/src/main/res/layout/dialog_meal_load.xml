@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#66000000">
+
+    <!-- dim 영역 -->
+    <View
+        android:id="@+id/view_dim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 중앙 팝업 -->
+    <LinearLayout
+        android:id="@+id/layout_meal_load_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+
+        android:orientation="vertical"
+        android:background="@drawable/bg_meal_load_popup_center"
+        android:paddingStart="16dp"
+        android:paddingTop="22dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="18dp">
+
+        <!-- 헤더 -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_meal_load_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="@font/scdream_bold"
+                android:text="식단 불러오기"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/iv_close"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_alignParentEnd="true"
+                android:contentDescription="닫기"
+                android:src="@drawable/icon_x" />
+        </RelativeLayout>
+
+        <!-- 기존 식단 item 재사용 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_meal_load"
+            android:layout_width="match_parent"
+            android:layout_height="480dp"
+            android:layout_marginTop="20dp"
+            android:clipToPadding="false"
+            android:paddingBottom="4dp"
+            android:scrollbars="none" />
+
+    </LinearLayout>
+
+</FrameLayout>
