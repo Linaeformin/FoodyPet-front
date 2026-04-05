@@ -349,9 +349,17 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
     }
 
     private fun updateDiary() {
-        Toast.makeText(requireContext(), "수정 완료 처리", Toast.LENGTH_SHORT).show()
-    }
+        val dialog = MealActionDialogFragment(
+            message = "밥 일기를 수정할까요?",
+            actionText = "수정하기"
+        ) {
+            Toast.makeText(requireContext(), "수정 완료 처리", Toast.LENGTH_SHORT).show()
 
+            parentFragmentManager.popBackStack()
+        }
+
+        dialog.show(parentFragmentManager, MealActionDialogFragment.TAG)
+    }
     private fun applyModeUi() {
         val isReadMode = diaryMode == DiaryMode.READ
 
@@ -453,10 +461,14 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         val deleteLayout = popupView.findViewById<View>(R.id.menu_delete_layout)
 
         editLayout.visibility =
-            if (diaryMode == DiaryMode.EDIT || diaryMode == DiaryMode.READ) View.VISIBLE else View.GONE
+            if (diaryMode == DiaryMode.READ) View.VISIBLE else View.GONE
+
+        deleteLayout.visibility =
+            if (diaryMode == DiaryMode.READ || diaryMode == DiaryMode.EDIT) View.VISIBLE else View.GONE
 
         editLayout.setOnClickListener {
             popupWindow.dismiss()
+
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, DiaryFragment.newInstance(DiaryMode.EDIT))
                 .addToBackStack(null)
@@ -465,10 +477,24 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
 
         deleteLayout.setOnClickListener {
             popupWindow.dismiss()
-            Toast.makeText(requireContext(), "삭제하기 클릭", Toast.LENGTH_SHORT).show()
+
+            val dialog = MealActionDialogFragment(
+                message = "밥 일기를 삭제할까요?",
+                actionText = "삭제하기"
+            ) {
+                deleteDiary()
+            }
+
+            dialog.show(parentFragmentManager, MealActionDialogFragment.TAG)
         }
 
         popupWindow.showAsDropDown(binding.mealMoreIv, -dpToPx(150), dpToPx(8))
+    }
+
+    private fun deleteDiary() {
+        Toast.makeText(requireContext(), "삭제 완료", Toast.LENGTH_SHORT).show()
+
+        requireActivity().onBackPressedDispatcher.onBackPressed()
     }
 
     private fun getDrawableCompat(drawableRes: Int): Drawable? {

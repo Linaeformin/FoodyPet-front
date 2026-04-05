@@ -106,6 +106,8 @@ class HomeFragment : Fragment() {
         moveRecommendFragment()
         moveNotification()
         moveDiary()
+        moveDiaryList()
+        popupSnack()
     }
 
     private fun updatePetLockUI(isPetRegistered: Boolean) {
@@ -344,6 +346,22 @@ class HomeFragment : Fragment() {
                 .replace(R.id.fragment_container, DiaryFragment.newInstance(DiaryMode.REGISTER))
                 .addToBackStack(null)
                 .commit()
+        }
+    }
+
+    private fun moveDiaryList() {
+        binding.homeFoodDiaryMealCv.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, MealDiaryListFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
+    private fun popupSnack() {
+        binding.homeFoodDiarySnackCv.setOnClickListener {
+            val dialog = SnackDialogFragment()
+            dialog.show(parentFragmentManager, "SnackDialog")
         }
     }
 }
