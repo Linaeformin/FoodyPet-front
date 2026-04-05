@@ -12,6 +12,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentHomeBinding
 import com.example.foodypet.home.adapter.HomePetPagerAdapter
+import com.example.foodypet.home.enum.DiaryMode
 import com.example.foodypet.home.model.PetPagerItem
 
 class HomeFragment : Fragment() {
@@ -104,6 +105,7 @@ class HomeFragment : Fragment() {
         moveMealAllFragment()
         moveRecommendFragment()
         moveNotification()
+        moveDiary()
     }
 
     private fun updatePetLockUI(isPetRegistered: Boolean) {
@@ -331,6 +333,15 @@ class HomeFragment : Fragment() {
         binding.homeAlarmIv.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, HomeNotificationFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
+    private fun moveDiary() {
+        binding.homeFoodDiaryRecordCv.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, DiaryFragment.newInstance(DiaryMode.REGISTER))
                 .addToBackStack(null)
                 .commit()
         }

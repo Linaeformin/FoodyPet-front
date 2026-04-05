@@ -49,5 +49,7 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.8.9")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
 }
 
