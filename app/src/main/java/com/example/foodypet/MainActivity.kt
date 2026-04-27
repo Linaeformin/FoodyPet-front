@@ -1,6 +1,7 @@
 package com.example.foodypet
 
 import android.os.Bundle
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -15,15 +16,26 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+
+        // 앱이 상태바 영역까지 그릴 수 있게 함
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // 상태바 투명
+        window.statusBarColor = Color.TRANSPARENT
+
+        // 상태바 자체 숨김
+        WindowInsetsControllerCompat(window, window.decorView).hide(
+            WindowInsetsCompat.Type.statusBars()
+        )
+
+        // 스와이프하면 잠깐 상태바가 보이게 하는 옵션
+        WindowInsetsControllerCompat(window, window.decorView).systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContentView(R.layout.activity_main)
 
-        WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.statusBars())
-
         bottomNavigationView = findViewById(R.id.bottom_navigation)
 
-        // 처음 실행될 때 기본 프래그먼트
         if (savedInstanceState == null) {
             replaceFragment(HomeFragment())
         }
