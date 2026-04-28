@@ -1,8 +1,12 @@
 package com.example.foodypet.stock.fragment
 
+import android.app.Dialog
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.view.Window
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -81,11 +85,11 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
 
     private fun setupRecyclerView() = with(binding) {
         stockAdapter = StockAdapter { item ->
-            // TODO: 일반 재고 아이템 클릭 처리
+            showNutritionDialog()
         }
 
         expiredStockAdapter = StockAdapter { item ->
-            // TODO: 유통기한 지난 음식 아이템 클릭 처리
+            showNutritionDialog()
         }
 
         stockRecyclerView.apply {
@@ -151,6 +155,33 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
             closeFabMenu()
 
             // TODO: 삭제 모드 진입 또는 삭제 처리
+        }
+    }
+
+    private fun showNutritionDialog() {
+        val dialog = Dialog(requireContext())
+
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_nutrition)
+        dialog.setCanceledOnTouchOutside(true)
+
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setDimAmount(0.55f)
+            setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        dialog.show()
+
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
         }
     }
 
