@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sort_bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_stock_sort_bottom_sheet"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/sort_name_tv"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center"
+        android:fontFamily="@font/scdream_regular"
+        android:text="가나다 순"
+        android:textColor="@color/black"
+        android:textSize="15sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#FFE0B8" />
+
+    <TextView
+        android:id="@+id/sort_created_tv"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center"
+        android:fontFamily="@font/scdream_regular"
+        android:text="등록 순"
+        android:textColor="@color/black"
+        android:textSize="15sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#FFE0B8" />
+
+    <TextView
+        android:id="@+id/sort_expiration_tv"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center"
+        android:fontFamily="@font/scdream_regular"
+        android:text="유통기한 순"
+        android:textColor="@color/black"
+        android:textSize="15sp" />
+
+</LinearLayout>

@@ -7,5 +7,6 @@ data class StockItem(
     val name: String,
     val count: String,
     val category: StockCategory,
-    val isExpired: Boolean
+    val isExpired: Boolean,
+    val createdAt: String
 )
