@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dropdown_keyword_tv"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:background="@drawable/bg_dropdown"
+    android:gravity="center_vertical"
+    android:paddingStart="22dp"
+    android:paddingEnd="22dp"
+    android:fontFamily="@font/scdream_regular"
+    android:textColor="@color/black"
+    android:textSize="14sp" />

@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentStockBinding
+import com.example.foodypet.home.fragment.MealAllFragment
 import com.example.foodypet.stock.adapter.StockAdapter
 import com.example.foodypet.stock.enum.StockCategory
 import com.example.foodypet.stock.model.StockItem
@@ -142,7 +143,10 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
             closeFabMenu()
 
             // TODO: 추가 화면으로 이동
-            // findNavController().navigate(R.id.action_stockFragment_to_stockAddFragment)
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StockAssignFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         stockMenuEditTv.setOnClickListener {

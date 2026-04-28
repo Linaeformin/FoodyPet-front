@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/stock_item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="164dp"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_orange_stroke_24"
+    android:padding="24dp">
+
+    <!-- 상품 이미지 배경 -->
+    <FrameLayout
+        android:id="@+id/product_img_container"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:background="@drawable/bg_stock_fab_menu"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/product_iv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="상품 이미지" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/product_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="4dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/scdream_medium"
+        android:maxLines="1"
+        android:text="[강아지 생식] 램포켓"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintStart_toEndOf="@id/product_img_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/product_img_container" />
+
+    <!-- 생식 태그 -->
+    <TextView
+        android:id="@+id/product_category_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_stock_category"
+        android:gravity="center"
+        android:minWidth="52dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:fontFamily="@font/scdream_regular"
+        android:text="생식"
+        android:textColor="@color/main"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/product_name_tv"
+        app:layout_constraintTop_toBottomOf="@id/product_name_tv" />
+
+    <TextView
+        android:id="@+id/nutrition_btn"
+        android:layout_width="108dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bg_orange_light_10"
+        android:gravity="center"
+        android:fontFamily="@font/scdream_regular"
+        android:text="영양성분표"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/stock_assign_btn"
+        android:layout_marginBottom="7dp" />
+
+    <TextView
+        android:id="@+id/stock_assign_btn"
+        android:layout_width="108dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bg_orange_main_10"
+        android:gravity="center"
+        android:fontFamily="@font/scdream_regular"
+        android:text="재고 등록"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/product_img_container" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

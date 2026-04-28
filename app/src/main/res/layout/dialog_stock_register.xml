@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/stock_dialog_container"
+    android:layout_width="360dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_radius_24"
+    android:paddingStart="24dp"
+    android:paddingTop="18dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="24dp">
+
+    <TextView
+        android:id="@+id/dialog_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/scdream_medium"
+        android:text="재고 등록"
+        android:textColor="@color/black"
+        android:textSize="17sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/close_iv"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:padding="4dp"
+        android:src="@drawable/icon_x"
+        app:layout_constraintBottom_toBottomOf="@id/dialog_title_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/dialog_title_tv" />
+
+    <!-- 제품명 -->
+    <LinearLayout
+        android:id="@+id/product_name_container"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/bg_stock_exist"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dialog_title_tv">
+
+        <TextView
+            android:layout_width="88dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_marginStart="5dp"
+            android:fontFamily="@font/scdream_medium"
+            android:text="제품명"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/product_name_tv"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_marginStart="5dp"
+            android:fontFamily="@font/scdream_regular"
+            android:text="[강아지 생식] 램포켓"
+            android:textColor="@color/black"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <!-- 유통기한 -->
+    <LinearLayout
+        android:id="@+id/expired_date_container"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_stock_exist"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/product_name_container">
+
+        <TextView
+            android:layout_width="88dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:fontFamily="@font/scdream_medium"
+            android:text="유통기한"
+            android:layout_marginStart="5dp"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/expired_date_et"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:layout_marginStart="5dp"
+            android:fontFamily="@font/scdream_regular"
+            android:hint="~2026.01.04"
+            android:inputType="date"
+            android:paddingHorizontal="12dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <!-- 총 수량 -->
+    <LinearLayout
+        android:id="@+id/quantity_container"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_stock_exist"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/expired_date_container">
+
+        <TextView
+            android:layout_width="88dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_marginStart="5dp"
+            android:fontFamily="@font/scdream_medium"
+            android:text="총 수량"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/quantity_et"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:fontFamily="@font/scdream_regular"
+            android:gravity="end|center_vertical"
+            android:inputType="number"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp"
+            android:text="2"
+            android:textColor="@color/black"
+            android:textSize="13sp" />
+
+        <!-- 단위 dropdown -->
+        <AutoCompleteTextView
+            android:id="@+id/unit_dropdown_actv"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="80dp"
+            android:background="@drawable/bg_unit_dropdown"
+            android:popupBackground="@drawable/bg_dropdown_popup"
+            android:dropDownVerticalOffset="4dp"
+            android:drawableEnd="@drawable/btn_arrow_bottom"
+            android:drawablePadding="4dp"
+            android:focusable="false"
+            android:clickable="true"
+            android:fontFamily="@font/scdream_medium"
+            android:gravity="center"
+            android:inputType="none"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="g"
+            android:textColor="@color/black"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/snack_check_iv"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/icon_square_check"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/quantity_container" />
+
+    <TextView
+        android:id="@+id/snack_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:fontFamily="@font/scdream_regular"
+        android:text="간식"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="@id/snack_check_iv"
+        app:layout_constraintStart_toEndOf="@id/snack_check_iv"
+        app:layout_constraintTop_toTopOf="@id/snack_check_iv" />
+
+    <!-- 등록하기 -->
+    <TextView
+        android:id="@+id/stock_assign_btn"
+        android:layout_width="90dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bg_orange_main_10"
+        android:gravity="center"
+        android:fontFamily="@font/scdream_regular"
+        android:text="등록하기"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/snack_check_iv"
+        app:layout_constraintTop_toTopOf="@id/snack_check_iv" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
