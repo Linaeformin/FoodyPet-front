@@ -15,6 +15,7 @@ import com.example.foodypet.home.adapter.HomePetPagerAdapter
 import com.example.foodypet.home.enum.DiaryMode
 import com.example.foodypet.home.model.NutritionUiModel
 import com.example.foodypet.home.model.PetPagerItem
+import com.example.foodypet.stock.fragment.StockFragment
 
 class HomeFragment : Fragment() {
 
@@ -111,6 +112,7 @@ class HomeFragment : Fragment() {
         popupSnack()
         popupWater()
         popupMedicine()
+        moveStock()
     }
 
     private fun updatePetLockUI(isPetRegistered: Boolean) {
@@ -347,6 +349,15 @@ class HomeFragment : Fragment() {
         binding.homeFoodDiaryRecordCv.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, DiaryFragment.newInstance(DiaryMode.REGISTER))
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
+    private fun moveStock() {
+        binding.homeStockIv.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StockFragment())
                 .addToBackStack(null)
                 .commit()
         }
