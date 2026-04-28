@@ -221,6 +221,61 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- 플로팅 메뉴 -->
+    <LinearLayout
+        android:id="@+id/stock_fab_menu_layout"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="18dp"
+        android:background="@drawable/bg_stock_fab_menu"
+        android:elevation="9dp"
+        android:orientation="vertical"
+        android:translationZ="9dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/stock_add_btn"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/stock_menu_add_tv"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:fontFamily="@font/scdream_regular"
+            android:gravity="center"
+            android:text="추가하기"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/bg_bottom_line" />
+
+        <TextView
+            android:id="@+id/stock_menu_edit_tv"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:fontFamily="@font/scdream_regular"
+            android:gravity="center"
+            android:text="수정하기"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/bg_bottom_line" />
+
+        <TextView
+            android:id="@+id/stock_menu_delete_tv"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:fontFamily="@font/scdream_regular"
+            android:gravity="center"
+            android:text="삭제하기"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+    </LinearLayout>
     <!-- 플로팅 추가 버튼 -->
     <ImageButton
         android:id="@+id/stock_add_btn"

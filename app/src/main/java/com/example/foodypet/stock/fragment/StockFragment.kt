@@ -26,6 +26,8 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
     private var selectedCategory: StockCategory = StockCategory.COOKED
     private var selectedSortType: StockSortType = StockSortType.EXPIRE
 
+    private var isFabMenuOpen = false
+
     private enum class StockSortType {
         NAME,
         CREATED,
@@ -129,9 +131,42 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         }
 
         stockAddBtn.setOnClickListener {
-            // TODO: 음식 추가 화면으로 이동
+            toggleFabMenu()
+        }
+
+        stockMenuAddTv.setOnClickListener {
+            closeFabMenu()
+
+            // TODO: 추가 화면으로 이동
             // findNavController().navigate(R.id.action_stockFragment_to_stockAddFragment)
         }
+
+        stockMenuEditTv.setOnClickListener {
+            closeFabMenu()
+
+            // TODO: 수정 모드 진입 또는 수정 화면 이동
+        }
+
+        stockMenuDeleteTv.setOnClickListener {
+            closeFabMenu()
+
+            // TODO: 삭제 모드 진입 또는 삭제 처리
+        }
+    }
+
+    private fun toggleFabMenu() = with(binding) {
+        isFabMenuOpen = !isFabMenuOpen
+
+        stockFabMenuLayout.visibility = if (isFabMenuOpen) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+    }
+
+    private fun closeFabMenu() = with(binding) {
+        isFabMenuOpen = false
+        stockFabMenuLayout.visibility = View.GONE
     }
 
     private fun changeCategory(category: StockCategory) {
