@@ -1,25 +1,25 @@
 package com.example.foodypet.stock.fragment
 
 import android.app.Dialog
+import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.view.inputmethod.InputMethodManager
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentStockAssignBinding
 import com.example.foodypet.stock.adapter.StockAssignAdapter
 import com.example.foodypet.stock.adapter.StockDropdownAdapter
 import com.example.foodypet.stock.enum.StockCategory
+import com.example.foodypet.stock.enum.StockDialogMode
 import com.example.foodypet.stock.model.StockItem
-import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.view.Window
-import android.view.inputmethod.InputMethodManager
-import com.example.foodypet.R
-import com.example.foodypet.stock.adapter.StockAdapter
 
 class StockAssignFragment : Fragment() {
 
@@ -67,7 +67,7 @@ class StockAssignFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentStockAssignBinding.inflate(inflater, container, false)
         return binding.root
@@ -76,11 +76,11 @@ class StockAssignFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupRecyclerView()
         initClickListener()
         initSearchListener()
-        setupRecyclerView()
 
-        stockAssignAdapter.submitList(dummyStockItems)
+        showStockList(dummyStockItems)
     }
 
     private fun setupRecyclerView() = with(binding) {
@@ -103,8 +103,8 @@ class StockAssignFragment : Fragment() {
                 showNutritionDialog()
             },
             onClickAssign = { item ->
-                // TODO 재고 등록 화면 이동
-                StockRegisterDialogFragment()
+                StockRegisterDialogFragment
+                    .newInstance(StockDialogMode.EXIST)
                     .show(parentFragmentManager, "StockRegisterDialog")
             }
         )
@@ -115,6 +115,7 @@ class StockAssignFragment : Fragment() {
             itemAnimator = null
         }
     }
+
     private fun initClickListener() {
         binding.stockBackIv.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
@@ -127,6 +128,12 @@ class StockAssignFragment : Fragment() {
             hideDropdown()
             hideKeyboard()
         }
+
+        binding.directRegisterBtn.setOnClickListener {
+            StockRegisterDialogFragment
+                .newInstance(StockDialogMode.NOT_EXIST)
+                .show(parentFragmentManager, "StockRegisterDialog")
+        }
     }
 
     private fun initSearchListener() {
@@ -135,7 +142,7 @@ class StockAssignFragment : Fragment() {
 
             if (keyword.isBlank()) {
                 hideDropdown()
-                stockAssignAdapter.submitList(dummyStockItems)
+                showStockList(dummyStockItems)
                 return@addTextChangedListener
             }
 
@@ -154,9 +161,6 @@ class StockAssignFragment : Fragment() {
     }
 
     private fun getRecommendedKeywords(keyword: String) {
-        // TODO 백엔드에서 추천 검색어 가져올 예정
-        // 여기서는 임시 데이터
-
         val dummyKeywords = listOf(
             "${keyword}포",
             "${keyword}켓",
@@ -170,12 +174,44 @@ class StockAssignFragment : Fragment() {
     }
 
     private fun searchStock(keyword: String) {
-        // TODO 백엔드 검색 API 연결 시 keyword 사용
-        stockAssignAdapter.submitList(dummyStockItems)
+        if (keyword.isBlank()) {
+            showStockList(dummyStockItems)
+            return
+        }
+
+        val searchResult = dummyStockItems.filter { stockItem ->
+            stockItem.name.contains(keyword, ignoreCase = true)
+        }
+
+        if (searchResult.isEmpty()) {
+            showEmptyState()
+        } else {
+            showStockList(searchResult)
+        }
     }
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+
+    private fun hideAllSearchResult() = with(binding) {
+        stockAssignAdapter.submitList(emptyList())
+
+        stockAssignRv.visibility = View.GONE
+        emptyStateContainer.visibility = View.GONE
+        stockDropdownRv.visibility = View.GONE
+    }
+
+    private fun showEmptyState() = with(binding) {
+        stockAssignAdapter.submitList(emptyList())
+
+        stockAssignRv.visibility = View.GONE
+        emptyStateContainer.visibility = View.VISIBLE
+        stockDropdownRv.visibility = View.GONE
+    }
+
+    private fun showStockList(items: List<StockItem>) = with(binding) {
+        emptyStateContainer.visibility = View.GONE
+        stockDropdownRv.visibility = View.GONE
+        stockAssignRv.visibility = View.VISIBLE
+
+        stockAssignAdapter.submitList(items)
     }
 
     private fun hideDropdown() {
@@ -213,5 +249,10 @@ class StockAssignFragment : Fragment() {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

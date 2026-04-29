@@ -48,9 +48,8 @@
         <TextView
             android:layout_width="88dp"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:layout_marginStart="5dp"
             android:fontFamily="@font/scdream_medium"
+            android:gravity="center"
             android:text="제품명"
             android:textColor="@color/white"
             android:textSize="14sp" />
@@ -59,13 +58,79 @@
             android:id="@+id/product_name_tv"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
             android:layout_marginStart="5dp"
+            android:layout_weight="1"
             android:fontFamily="@font/scdream_regular"
+            android:gravity="center"
             android:text="[강아지 생식] 램포켓"
             android:textColor="@color/black"
             android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <!-- 카테고리 버튼 영역 -->
+    <LinearLayout
+        android:id="@+id/stock_category_layout"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/product_name_container">
+
+        <TextView
+            android:id="@+id/category_cooked_tv"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_stock_fill_5"
+            android:fontFamily="@font/scdream_medium"
+            android:gravity="center"
+            android:text="화식"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/category_wet_tv"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_stock_unfill_5"
+            android:fontFamily="@font/scdream_light"
+            android:gravity="center"
+            android:text="습식"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/category_fresh_tv"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_stock_unfill_5"
+            android:fontFamily="@font/scdream_light"
+            android:gravity="center"
+            android:text="생식"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/category_dry_tv"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_stock_unfill_5"
+            android:fontFamily="@font/scdream_light"
+            android:gravity="center"
+            android:text="건식"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
@@ -79,15 +144,14 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/product_name_container">
+        app:layout_constraintTop_toBottomOf="@id/stock_category_layout">
 
         <TextView
             android:layout_width="88dp"
             android:layout_height="match_parent"
-            android:gravity="center"
             android:fontFamily="@font/scdream_medium"
+            android:gravity="center"
             android:text="유통기한"
-            android:layout_marginStart="5dp"
             android:textColor="@color/white"
             android:textSize="14sp" />
 
@@ -95,16 +159,16 @@
             android:id="@+id/expired_date_et"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:gravity="center"
-            android:layout_marginStart="5dp"
             android:fontFamily="@font/scdream_regular"
+            android:gravity="center"
             android:hint="~2026.01.04"
             android:inputType="date"
             android:paddingHorizontal="12dp"
             android:textColor="@color/black"
-            android:textColorHint="@color/black"
+            android:textColorHint="@color/gray"
             android:textSize="13sp" />
 
     </LinearLayout>
@@ -125,9 +189,8 @@
         <TextView
             android:layout_width="88dp"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:layout_marginStart="5dp"
             android:fontFamily="@font/scdream_medium"
+            android:gravity="center"
             android:text="총 수량"
             android:textColor="@color/white"
             android:textSize="14sp" />
@@ -140,14 +203,14 @@
             android:background="@android:color/transparent"
             android:fontFamily="@font/scdream_regular"
             android:gravity="end|center_vertical"
+            android:hint="1"
             android:inputType="number"
             android:paddingStart="8dp"
             android:paddingEnd="4dp"
-            android:text="2"
             android:textColor="@color/black"
+            android:textColorHint="@color/gray"
             android:textSize="13sp" />
 
-        <!-- 단위 dropdown -->
         <AutoCompleteTextView
             android:id="@+id/unit_dropdown_actv"
             android:layout_width="wrap_content"
@@ -155,20 +218,55 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="80dp"
             android:background="@drawable/bg_unit_dropdown"
-            android:popupBackground="@drawable/bg_dropdown_popup"
-            android:dropDownVerticalOffset="4dp"
+            android:clickable="true"
             android:drawableEnd="@drawable/btn_arrow_bottom"
             android:drawablePadding="4dp"
+            android:dropDownVerticalOffset="4dp"
             android:focusable="false"
-            android:clickable="true"
             android:fontFamily="@font/scdream_medium"
             android:gravity="center"
             android:inputType="none"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
+            android:popupBackground="@drawable/bg_dropdown_popup"
             android:text="g"
             android:textColor="@color/black"
             android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <!-- 영양성분표 -->
+    <LinearLayout
+        android:id="@+id/nutrition_container"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_stock_exist"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/quantity_container">
+
+        <TextView
+            android:layout_width="88dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:fontFamily="@font/scdream_medium"
+            android:gravity="center"
+            android:text="영양성분표"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/nutrition_file_iv"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="90dp"
+            android:padding="6dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_file" />
 
     </LinearLayout>
 
@@ -179,7 +277,7 @@
         android:layout_marginTop="16dp"
         android:src="@drawable/icon_square_check"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/quantity_container" />
+        app:layout_constraintTop_toBottomOf="@id/nutrition_container" />
 
     <TextView
         android:id="@+id/snack_tv"
@@ -200,13 +298,13 @@
         android:layout_width="90dp"
         android:layout_height="30dp"
         android:background="@drawable/bg_orange_main_10"
-        android:gravity="center"
         android:fontFamily="@font/scdream_regular"
+        android:gravity="center"
         android:text="등록하기"
         android:textColor="@color/black"
         android:textSize="13sp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/snack_check_iv"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/snack_check_iv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
