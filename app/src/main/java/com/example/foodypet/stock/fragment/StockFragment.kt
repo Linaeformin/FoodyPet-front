@@ -367,12 +367,22 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
 
             // TODO: 삭제 모드 진입 또는 삭제 처리
         }
+
+        stockEditCompleteBtn.setOnClickListener {
+            // TODO: 서버에 수정된 재고 수량 반영 API 연결
+
+            exitEditMode()
+        }
     }
 
     private fun enterEditMode() = with(binding) {
         currentScreenMode = StockScreenMode.EDIT
 
         stockTitleTv.text = "재고 수정"
+
+        stockAddBtn.visibility = View.GONE
+        stockFabMenuLayout.visibility = View.GONE
+        stockEditCompleteBtn.visibility = View.VISIBLE
 
         setupAdapters(StockScreenMode.EDIT)
         renderStockList()
@@ -382,6 +392,9 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         currentScreenMode = StockScreenMode.VIEW
 
         stockTitleTv.text = "재고 관리"
+
+        stockAddBtn.visibility = View.VISIBLE
+        stockEditCompleteBtn.visibility = View.GONE
 
         setupAdapters(StockScreenMode.VIEW)
         renderStockList()
