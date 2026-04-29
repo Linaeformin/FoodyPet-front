@@ -13,9 +13,9 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1.15"
+        android:fontFamily="@font/scdream_light"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:fontFamily="@font/scdream_light"
         android:text="~26.11.30"
         android:textColor="@color/black"
         android:textSize="13sp" />
@@ -25,23 +25,68 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2.1"
+        android:fontFamily="@font/scdream_light"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:fontFamily="@font/scdream_light"
         android:maxLines="1"
         android:text="흑돼지 치즈볼"
         android:textColor="@color/black"
         android:textSize="13sp" />
 
+    <!-- 재고 관리 화면용: 1봉 -->
     <TextView
         android:id="@+id/stock_count_tv"
         android:layout_width="75dp"
         android:layout_height="match_parent"
+        android:fontFamily="@font/scdream_light"
         android:gravity="center"
         android:includeFontPadding="false"
         android:text="1봉"
-        android:fontFamily="@font/scdream_light"
         android:textColor="@color/black"
         android:textSize="13sp" />
+
+    <!-- 재고 수정 화면용: + 1봉 - -->
+    <LinearLayout
+        android:id="@+id/stock_count_edit_layout"
+        android:layout_width="82dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_stock_count_edit"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/stock_plus_iv"
+            android:layout_width="18dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:text="+"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/stock_edit_count_tv"
+            android:layout_width="38dp"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/scdream_light"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="1봉"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/stock_minus_iv"
+            android:layout_width="18dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:text="−"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+    </LinearLayout>
 
 </LinearLayout>

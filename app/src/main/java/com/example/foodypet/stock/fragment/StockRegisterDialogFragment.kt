@@ -75,6 +75,8 @@ class StockRegisterDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.dialogTitleTv.text = dialogTitle
+
         applyDialogMode()
         initUnitDropdown()
         initCategoryClickListeners()
@@ -278,13 +280,22 @@ class StockRegisterDialogFragment : DialogFragment() {
 
     companion object {
         private const val ARG_MODE = "mode"
+        private const val ARG_TITLE = "title"
 
-        fun newInstance(mode: StockDialogMode): StockRegisterDialogFragment {
+        fun newInstance(
+            mode: StockDialogMode,
+            title: String = "재고 등록"
+        ): StockRegisterDialogFragment {
             return StockRegisterDialogFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_MODE, mode.name)
+                    putString(ARG_TITLE, title)
                 }
             }
         }
+    }
+
+    private val dialogTitle: String by lazy {
+        arguments?.getString(ARG_TITLE) ?: "재고 등록"
     }
 }

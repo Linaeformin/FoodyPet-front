@@ -19,6 +19,7 @@ import com.example.foodypet.stock.adapter.StockAssignAdapter
 import com.example.foodypet.stock.adapter.StockDropdownAdapter
 import com.example.foodypet.stock.enum.StockCategory
 import com.example.foodypet.stock.enum.StockDialogMode
+import com.example.foodypet.stock.enum.StockSourceType
 import com.example.foodypet.stock.model.StockItem
 
 class StockAssignFragment : Fragment() {
@@ -29,39 +30,38 @@ class StockAssignFragment : Fragment() {
     private lateinit var dropdownAdapter: StockDropdownAdapter
     private lateinit var stockAssignAdapter: StockAssignAdapter
 
-    private val dummyStockItems = listOf(
-        StockItem(
-            expireDate = "2025-12-31",
-            name = "[강아지 생식] 램포켓",
-            count = "10",
-            category = StockCategory.FRESH,
-            isExpired = false,
-            createdAt = "2025-01-01"
-        ),
-        StockItem(
-            expireDate = "2025-12-31",
-            name = "[강아지 생식] 램포켓",
-            count = "8",
-            category = StockCategory.FRESH,
-            isExpired = false,
-            createdAt = "2025-01-01"
-        ),
-        StockItem(
-            expireDate = "2025-12-31",
-            name = "[강아지 생식] 램포켓",
-            count = "5",
-            category = StockCategory.FRESH,
-            isExpired = false,
-            createdAt = "2025-01-01"
-        ),
-        StockItem(
-            expireDate = "2025-12-31",
-            name = "[강아지 생식] 램포켓",
-            count = "3",
-            category = StockCategory.FRESH,
-            isExpired = false,
-            createdAt = "2025-01-01"
-        )
+    private val stockItems = mutableListOf(
+        // COOKED - 일반 재고
+        StockItem("26.11.30", "흑돼지 치즈볼", "1봉", StockCategory.COOKED, false, "2025.03.01", StockSourceType.SERVICE),
+        StockItem("26.08.15", "닭고기 완자", "2봉", StockCategory.COOKED, false, "2025.01.20", StockSourceType.SERVICE),
+        StockItem("26.12.05", "소고기 미트볼", "1팩", StockCategory.COOKED, false, "2025.04.10", StockSourceType.USER),
+        StockItem("26.09.01", "오리 고기볼", "3봉", StockCategory.COOKED, false, "2025.02.12", StockSourceType.SERVICE),
+        StockItem("26.07.20", "연어 큐브", "2팩", StockCategory.COOKED, false, "2025.05.03", StockSourceType.USER),
+
+        // COOKED - 유통기한 지난 음식
+        StockItem("25.01.10", "고구마 치킨볼", "1봉", StockCategory.COOKED, true, "2024.11.01", StockSourceType.SERVICE),
+        StockItem("24.12.25", "한우 야채죽", "1팩", StockCategory.COOKED, true, "2024.10.15", StockSourceType.USER),
+        StockItem("25.02.03", "단호박 미트볼", "2팩", StockCategory.COOKED, true, "2024.12.20", StockSourceType.SERVICE),
+
+        // WET
+        StockItem("26.12.01", "닭가슴살 습식캔", "2캔", StockCategory.WET, false, "2025.02.01", StockSourceType.SERVICE),
+        StockItem("26.06.10", "참치 습식캔", "4캔", StockCategory.WET, false, "2025.01.11", StockSourceType.SERVICE),
+        StockItem("25.03.05", "연어 습식파우치", "1개", StockCategory.WET, true, "2024.09.22", StockSourceType.USER),
+
+        // FRESH
+        StockItem("26.05.12", "생닭 안심살", "1팩", StockCategory.FRESH, false, "2025.03.15", StockSourceType.USER),
+        StockItem("26.04.01", "생연어 슬라이스", "2팩", StockCategory.FRESH, false, "2025.02.18", StockSourceType.SERVICE),
+        StockItem("25.02.14", "생오리 목뼈", "1팩", StockCategory.FRESH, true, "2024.08.30", StockSourceType.USER),
+
+        // DRY
+        StockItem("26.10.01", "연어 건식 사료", "1봉", StockCategory.DRY, false, "2025.01.05", StockSourceType.SERVICE),
+        StockItem("27.01.20", "양고기 건식 사료", "1봉", StockCategory.DRY, false, "2025.04.01", StockSourceType.SERVICE),
+        StockItem("26.03.18", "오리 건식 사료", "2봉", StockCategory.DRY, false, "2025.02.25", StockSourceType.USER),
+
+        // SNACK
+        StockItem("26.08.15", "강아지 간식", "3개", StockCategory.SNACK, false, "2025.03.08", StockSourceType.SERVICE),
+        StockItem("26.02.10", "고구마 스틱", "5개", StockCategory.SNACK, false, "2025.01.25", StockSourceType.USER),
+        StockItem("25.01.01", "치킨 져키", "2개", StockCategory.SNACK, true, "2024.07.10", StockSourceType.SERVICE)
     )
 
     override fun onCreateView(
@@ -80,7 +80,7 @@ class StockAssignFragment : Fragment() {
         initClickListener()
         initSearchListener()
 
-        showStockList(dummyStockItems)
+        showStockList(stockItems)
     }
 
     private fun setupRecyclerView() = with(binding) {
@@ -142,7 +142,7 @@ class StockAssignFragment : Fragment() {
 
             if (keyword.isBlank()) {
                 hideDropdown()
-                showStockList(dummyStockItems)
+                showStockList(stockItems)
                 return@addTextChangedListener
             }
 
@@ -175,11 +175,11 @@ class StockAssignFragment : Fragment() {
 
     private fun searchStock(keyword: String) {
         if (keyword.isBlank()) {
-            showStockList(dummyStockItems)
+            showStockList(stockItems)
             return
         }
 
-        val searchResult = dummyStockItems.filter { stockItem ->
+        val searchResult = stockItems.filter { stockItem ->
             stockItem.name.contains(keyword, ignoreCase = true)
         }
 

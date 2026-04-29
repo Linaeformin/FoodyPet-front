@@ -14,9 +14,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentStockBinding
-import com.example.foodypet.home.fragment.MealAllFragment
 import com.example.foodypet.stock.adapter.StockAdapter
 import com.example.foodypet.stock.enum.StockCategory
+import com.example.foodypet.stock.enum.StockDialogMode
+import com.example.foodypet.stock.enum.StockScreenMode
+import com.example.foodypet.stock.enum.StockSourceType
 import com.example.foodypet.stock.model.StockItem
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
@@ -30,6 +32,7 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
 
     private var selectedCategory: StockCategory = StockCategory.COOKED
     private var selectedSortType: StockSortType = StockSortType.EXPIRE
+    private var currentScreenMode: StockScreenMode = StockScreenMode.VIEW
 
     private var isFabMenuOpen = false
 
@@ -39,38 +42,198 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         EXPIRE
     }
 
-    private val stockItems = listOf(
+    private val stockItems = mutableListOf(
         // COOKED - 일반 재고
-        StockItem("26.11.30", "흑돼지 치즈볼", "1봉", StockCategory.COOKED, false, "2025.03.01"),
-        StockItem("26.08.15", "닭고기 완자", "2봉", StockCategory.COOKED, false, "2025.01.20"),
-        StockItem("26.12.05", "소고기 미트볼", "1팩", StockCategory.COOKED, false, "2025.04.10"),
-        StockItem("26.09.01", "오리 고기볼", "3봉", StockCategory.COOKED, false, "2025.02.12"),
-        StockItem("26.07.20", "연어 큐브", "2팩", StockCategory.COOKED, false, "2025.05.03"),
+        StockItem(
+            "26.11.30",
+            "흑돼지 치즈볼",
+            "1봉",
+            StockCategory.COOKED,
+            false,
+            "2025.03.01",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "26.08.15",
+            "닭고기 완자",
+            "2봉",
+            StockCategory.COOKED,
+            false,
+            "2025.01.20",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "26.12.05",
+            "소고기 미트볼",
+            "1팩",
+            StockCategory.COOKED,
+            false,
+            "2025.04.10",
+            StockSourceType.USER
+        ),
+        StockItem(
+            "26.09.01",
+            "오리 고기볼",
+            "3봉",
+            StockCategory.COOKED,
+            false,
+            "2025.02.12",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "26.07.20",
+            "연어 큐브",
+            "2팩",
+            StockCategory.COOKED,
+            false,
+            "2025.05.03",
+            StockSourceType.USER
+        ),
 
         // COOKED - 유통기한 지난 음식
-        StockItem("25.01.10", "고구마 치킨볼", "1봉", StockCategory.COOKED, true, "2024.11.01"),
-        StockItem("24.12.25", "한우 야채죽", "1팩", StockCategory.COOKED, true, "2024.10.15"),
-        StockItem("25.02.03", "단호박 미트볼", "2팩", StockCategory.COOKED, true, "2024.12.20"),
+        StockItem(
+            "25.01.10",
+            "고구마 치킨볼",
+            "1봉",
+            StockCategory.COOKED,
+            true,
+            "2024.11.01",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "24.12.25",
+            "한우 야채죽",
+            "1팩",
+            StockCategory.COOKED,
+            true,
+            "2024.10.15",
+            StockSourceType.USER
+        ),
+        StockItem(
+            "25.02.03",
+            "단호박 미트볼",
+            "2팩",
+            StockCategory.COOKED,
+            true,
+            "2024.12.20",
+            StockSourceType.SERVICE
+        ),
 
         // WET
-        StockItem("26.12.01", "닭가슴살 습식캔", "2캔", StockCategory.WET, false, "2025.02.01"),
-        StockItem("26.06.10", "참치 습식캔", "4캔", StockCategory.WET, false, "2025.01.11"),
-        StockItem("25.03.05", "연어 습식파우치", "1개", StockCategory.WET, true, "2024.09.22"),
+        StockItem(
+            "26.12.01",
+            "닭가슴살 습식캔",
+            "2캔",
+            StockCategory.WET,
+            false,
+            "2025.02.01",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "26.06.10",
+            "참치 습식캔",
+            "4캔",
+            StockCategory.WET,
+            false,
+            "2025.01.11",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "25.03.05",
+            "연어 습식파우치",
+            "1개",
+            StockCategory.WET,
+            true,
+            "2024.09.22",
+            StockSourceType.USER
+        ),
 
         // FRESH
-        StockItem("26.05.12", "생닭 안심살", "1팩", StockCategory.FRESH, false, "2025.03.15"),
-        StockItem("26.04.01", "생연어 슬라이스", "2팩", StockCategory.FRESH, false, "2025.02.18"),
-        StockItem("25.02.14", "생오리 목뼈", "1팩", StockCategory.FRESH, true, "2024.08.30"),
+        StockItem(
+            "26.05.12",
+            "생닭 안심살",
+            "1팩",
+            StockCategory.FRESH,
+            false,
+            "2025.03.15",
+            StockSourceType.USER
+        ),
+        StockItem(
+            "26.04.01",
+            "생연어 슬라이스",
+            "2팩",
+            StockCategory.FRESH,
+            false,
+            "2025.02.18",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "25.02.14",
+            "생오리 목뼈",
+            "1팩",
+            StockCategory.FRESH,
+            true,
+            "2024.08.30",
+            StockSourceType.USER
+        ),
 
         // DRY
-        StockItem("26.10.01", "연어 건식 사료", "1봉", StockCategory.DRY, false, "2025.01.05"),
-        StockItem("27.01.20", "양고기 건식 사료", "1봉", StockCategory.DRY, false, "2025.04.01"),
-        StockItem("26.03.18", "오리 건식 사료", "2봉", StockCategory.DRY, false, "2025.02.25"),
+        StockItem(
+            "26.10.01",
+            "연어 건식 사료",
+            "1봉",
+            StockCategory.DRY,
+            false,
+            "2025.01.05",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "27.01.20",
+            "양고기 건식 사료",
+            "1봉",
+            StockCategory.DRY,
+            false,
+            "2025.04.01",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "26.03.18",
+            "오리 건식 사료",
+            "2봉",
+            StockCategory.DRY,
+            false,
+            "2025.02.25",
+            StockSourceType.USER
+        ),
 
         // SNACK
-        StockItem("26.08.15", "강아지 간식", "3개", StockCategory.SNACK, false, "2025.03.08"),
-        StockItem("26.02.10", "고구마 스틱", "5개", StockCategory.SNACK, false, "2025.01.25"),
-        StockItem("25.01.01", "치킨 져키", "2개", StockCategory.SNACK, true, "2024.07.10")
+        StockItem(
+            "26.08.15",
+            "강아지 간식",
+            "3개",
+            StockCategory.SNACK,
+            false,
+            "2025.03.08",
+            StockSourceType.SERVICE
+        ),
+        StockItem(
+            "26.02.10",
+            "고구마 스틱",
+            "5개",
+            StockCategory.SNACK,
+            false,
+            "2025.01.25",
+            StockSourceType.USER
+        ),
+        StockItem(
+            "25.01.01",
+            "치킨 져키",
+            "2개",
+            StockCategory.SNACK,
+            true,
+            "2024.07.10",
+            StockSourceType.SERVICE
+        )
     )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -85,30 +248,76 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
     }
 
     private fun setupRecyclerView() = with(binding) {
-        stockAdapter = StockAdapter { item ->
-            showNutritionDialog()
-        }
-
-        expiredStockAdapter = StockAdapter { item ->
-            showNutritionDialog()
-        }
+        setupAdapters(StockScreenMode.VIEW)
 
         stockRecyclerView.apply {
-            adapter = stockAdapter
             layoutManager = LinearLayoutManager(requireContext())
             itemAnimator = null
         }
 
         expiredStockRecyclerView.apply {
-            adapter = expiredStockAdapter
             layoutManager = LinearLayoutManager(requireContext())
             itemAnimator = null
         }
     }
 
+    private fun setupAdapters(screenMode: StockScreenMode) = with(binding) {
+        currentScreenMode = screenMode
+
+        stockAdapter = StockAdapter(
+            screenMode = currentScreenMode,
+            onItemClick = { item ->
+                when (currentScreenMode) {
+                    StockScreenMode.VIEW -> {
+                        showNutritionDialog()
+                    }
+
+                    StockScreenMode.EDIT -> {
+                        showStockRegisterDialog(item)
+                    }
+
+                    StockScreenMode.DELETE -> {
+
+                    }
+                }
+            },
+            onCountChanged = { item, newCount ->
+                updateStockCount(item, newCount)
+            }
+        )
+
+        expiredStockAdapter = StockAdapter(
+            screenMode = currentScreenMode,
+            onItemClick = { item ->
+                when (currentScreenMode) {
+                    StockScreenMode.VIEW -> {
+                        showNutritionDialog()
+                    }
+
+                    StockScreenMode.EDIT -> {
+                        showStockRegisterDialog(item)
+                    }
+
+                    StockScreenMode.DELETE -> {
+
+                    }
+                }
+            },
+            onCountChanged = { item, newCount ->
+                updateStockCount(item, newCount)
+            }
+        )
+
+        stockRecyclerView.adapter = stockAdapter
+        expiredStockRecyclerView.adapter = expiredStockAdapter
+    }
     private fun initClickListeners() = with(binding) {
         stockBackIv.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            if (currentScreenMode == StockScreenMode.EDIT) {
+                exitEditMode()
+            } else {
+                requireActivity().onBackPressedDispatcher.onBackPressed()
+            }
         }
 
         categoryCookedTv.setOnClickListener {
@@ -142,7 +351,6 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         stockMenuAddTv.setOnClickListener {
             closeFabMenu()
 
-            // TODO: 추가 화면으로 이동
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, StockAssignFragment())
                 .addToBackStack(null)
@@ -151,8 +359,7 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
 
         stockMenuEditTv.setOnClickListener {
             closeFabMenu()
-
-            // TODO: 수정 모드 진입 또는 수정 화면 이동
+            enterEditMode()
         }
 
         stockMenuDeleteTv.setOnClickListener {
@@ -160,6 +367,63 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
 
             // TODO: 삭제 모드 진입 또는 삭제 처리
         }
+    }
+
+    private fun enterEditMode() = with(binding) {
+        currentScreenMode = StockScreenMode.EDIT
+
+        stockTitleTv.text = "재고 수정"
+
+        setupAdapters(StockScreenMode.EDIT)
+        renderStockList()
+    }
+
+    private fun exitEditMode() = with(binding) {
+        currentScreenMode = StockScreenMode.VIEW
+
+        stockTitleTv.text = "재고 관리"
+
+        setupAdapters(StockScreenMode.VIEW)
+        renderStockList()
+    }
+
+    private fun updateStockCount(targetItem: StockItem, newCount: String) {
+        val index = stockItems.indexOfFirst {
+            it.expireDate == targetItem.expireDate &&
+                    it.name == targetItem.name &&
+                    it.category == targetItem.category &&
+                    it.isExpired == targetItem.isExpired &&
+                    it.createdAt == targetItem.createdAt &&
+                    it.sourceType == targetItem.sourceType
+        }
+
+        if (index == -1) return
+
+        stockItems[index] = stockItems[index].copy(
+            count = newCount
+        )
+
+        renderStockList()
+    }
+
+    private fun showStockRegisterDialog(item: StockItem) {
+        val dialogMode = when (item.sourceType) {
+            StockSourceType.USER -> StockDialogMode.NOT_EXIST
+            StockSourceType.SERVICE -> StockDialogMode.EXIST
+        }
+
+        val dialogTitle = when (currentScreenMode) {
+            StockScreenMode.VIEW -> "재고 등록"
+            StockScreenMode.EDIT -> "재고 수정"
+            StockScreenMode.DELETE -> "재고 삭제"
+        }
+
+        StockRegisterDialogFragment
+            .newInstance(
+                mode = dialogMode,
+                title = dialogTitle
+            )
+            .show(parentFragmentManager, "StockRegisterDialog")
     }
 
     private fun showNutritionDialog() {
@@ -226,8 +490,11 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
             val isSelected = category == selectedCategory
 
             textView.setBackgroundResource(
-                if (isSelected) R.drawable.bg_stock_fill_5
-                else R.drawable.bg_stock_unfill_5
+                if (isSelected) {
+                    R.drawable.bg_stock_fill_5
+                } else {
+                    R.drawable.bg_stock_unfill_5
+                }
             )
 
             textView.setTextColor(
