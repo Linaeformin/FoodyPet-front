@@ -10,5 +10,6 @@ data class StockItem(
     val category: StockCategory,
     val isExpired: Boolean,
     val createdAt: String,
-    val sourceType: StockSourceType
+    val sourceType: StockSourceType,
+    val isSelected: Boolean = false
 )

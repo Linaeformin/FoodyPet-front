@@ -7,6 +7,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
+import com.example.foodypet.community.fragment.CommunityFragment
 import com.example.foodypet.home.fragment.HomeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -46,8 +47,8 @@ class MainActivity : AppCompatActivity() {
                     replaceFragment(HomeFragment())
                     true
                 }
-                R.id.nav_search -> {
-                    replaceFragment(SearchFragment())
+                R.id.nav_community -> {
+                        replaceFragment(CommunityFragment())
                     true
                 }
                 R.id.nav_mypage -> {

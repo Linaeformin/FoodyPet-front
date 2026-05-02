@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -43,7 +44,6 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
     }
 
     private val stockItems = mutableListOf(
-        // COOKED - 일반 재고
         StockItem(
             "26.11.30",
             "흑돼지 치즈볼",
@@ -90,7 +90,6 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
             StockSourceType.USER
         ),
 
-        // COOKED - 유통기한 지난 음식
         StockItem(
             "25.01.10",
             "고구마 치킨볼",
@@ -119,7 +118,6 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
             StockSourceType.SERVICE
         ),
 
-        // WET
         StockItem(
             "26.12.01",
             "닭가슴살 습식캔",
@@ -148,7 +146,6 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
             StockSourceType.USER
         ),
 
-        // FRESH
         StockItem(
             "26.05.12",
             "생닭 안심살",
@@ -177,7 +174,6 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
             StockSourceType.USER
         ),
 
-        // DRY
         StockItem(
             "26.10.01",
             "연어 건식 사료",
@@ -206,7 +202,6 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
             StockSourceType.USER
         ),
 
-        // SNACK
         StockItem(
             "26.08.15",
             "강아지 간식",
@@ -277,12 +272,15 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
                     }
 
                     StockScreenMode.DELETE -> {
-
+                        toggleStockSelection(item)
                     }
                 }
             },
             onCountChanged = { item, newCount ->
                 updateStockCount(item, newCount)
+            },
+            onCheckClick = { item ->
+                toggleStockSelection(item)
             }
         )
 
@@ -299,24 +297,36 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
                     }
 
                     StockScreenMode.DELETE -> {
-
+                        toggleStockSelection(item)
                     }
                 }
             },
             onCountChanged = { item, newCount ->
                 updateStockCount(item, newCount)
+            },
+            onCheckClick = { item ->
+                toggleStockSelection(item)
             }
         )
 
         stockRecyclerView.adapter = stockAdapter
         expiredStockRecyclerView.adapter = expiredStockAdapter
     }
+
     private fun initClickListeners() = with(binding) {
         stockBackIv.setOnClickListener {
-            if (currentScreenMode == StockScreenMode.EDIT) {
-                exitEditMode()
-            } else {
-                requireActivity().onBackPressedDispatcher.onBackPressed()
+            when (currentScreenMode) {
+                StockScreenMode.VIEW -> {
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                }
+
+                StockScreenMode.EDIT -> {
+                    exitEditMode()
+                }
+
+                StockScreenMode.DELETE -> {
+                    exitDeleteMode()
+                }
             }
         }
 
@@ -364,14 +374,24 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
 
         stockMenuDeleteTv.setOnClickListener {
             closeFabMenu()
-
-            // TODO: 삭제 모드 진입 또는 삭제 처리
+            enterDeleteMode()
         }
 
         stockEditCompleteBtn.setOnClickListener {
-            // TODO: 서버에 수정된 재고 수량 반영 API 연결
+            when (currentScreenMode) {
+                StockScreenMode.VIEW -> {
+                    // 기본 모드에서는 버튼이 보이지 않으므로 처리 없음
+                }
 
-            exitEditMode()
+                StockScreenMode.EDIT -> {
+                    // TODO: 서버에 수정된 재고 수량 반영 API 연결
+                    exitEditMode()
+                }
+
+                StockScreenMode.DELETE -> {
+                    deleteSelectedStocks()
+                }
+            }
         }
     }
 
@@ -382,6 +402,8 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
 
         stockAddBtn.visibility = View.GONE
         stockFabMenuLayout.visibility = View.GONE
+
+        stockEditCompleteBtn.text = "수정 완료"
         stockEditCompleteBtn.visibility = View.VISIBLE
 
         setupAdapters(StockScreenMode.EDIT)
@@ -394,20 +416,90 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         stockTitleTv.text = "재고 관리"
 
         stockAddBtn.visibility = View.VISIBLE
+        stockFabMenuLayout.visibility = View.GONE
+
+        stockEditCompleteBtn.text = "수정 완료"
         stockEditCompleteBtn.visibility = View.GONE
 
         setupAdapters(StockScreenMode.VIEW)
         renderStockList()
     }
 
+    private fun enterDeleteMode() = with(binding) {
+        currentScreenMode = StockScreenMode.DELETE
+
+        clearSelectedItems()
+
+        stockTitleTv.text = "재고 삭제"
+
+        stockAddBtn.visibility = View.GONE
+        stockFabMenuLayout.visibility = View.GONE
+
+        stockEditCompleteBtn.text = "삭제하기"
+        stockEditCompleteBtn.visibility = View.VISIBLE
+
+        setupAdapters(StockScreenMode.DELETE)
+        renderStockList()
+    }
+
+    private fun exitDeleteMode() = with(binding) {
+        currentScreenMode = StockScreenMode.VIEW
+
+        clearSelectedItems()
+
+        stockTitleTv.text = "재고 관리"
+
+        stockAddBtn.visibility = View.VISIBLE
+        stockFabMenuLayout.visibility = View.GONE
+
+        stockEditCompleteBtn.text = "수정 완료"
+        stockEditCompleteBtn.visibility = View.GONE
+
+        setupAdapters(StockScreenMode.VIEW)
+        renderStockList()
+    }
+
+    private fun toggleStockSelection(targetItem: StockItem) {
+        val index = stockItems.indexOfFirst {
+            isSameStockItem(it, targetItem)
+        }
+
+        if (index == -1) return
+
+        stockItems[index] = stockItems[index].copy(
+            isSelected = !stockItems[index].isSelected
+        )
+
+        renderStockList()
+    }
+
+    private fun deleteSelectedStocks() {
+        val selectedItems = stockItems.filter { it.isSelected }
+
+        if (selectedItems.isEmpty()) {
+            Toast.makeText(requireContext(), "삭제할 재고를 선택해줘", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // TODO: 서버 삭제 API 연결
+        // selectedItems를 서버에 보내서 삭제하면 됨
+
+        stockItems.removeAll { it.isSelected }
+
+        exitDeleteMode()
+    }
+
+    private fun clearSelectedItems() {
+        for (i in stockItems.indices) {
+            if (stockItems[i].isSelected) {
+                stockItems[i] = stockItems[i].copy(isSelected = false)
+            }
+        }
+    }
+
     private fun updateStockCount(targetItem: StockItem, newCount: String) {
         val index = stockItems.indexOfFirst {
-            it.expireDate == targetItem.expireDate &&
-                    it.name == targetItem.name &&
-                    it.category == targetItem.category &&
-                    it.isExpired == targetItem.isExpired &&
-                    it.createdAt == targetItem.createdAt &&
-                    it.sourceType == targetItem.sourceType
+            isSameStockItem(it, targetItem)
         }
 
         if (index == -1) return
@@ -417,6 +509,18 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         )
 
         renderStockList()
+    }
+
+    private fun isSameStockItem(
+        item: StockItem,
+        targetItem: StockItem
+    ): Boolean {
+        return item.expireDate == targetItem.expireDate &&
+                item.name == targetItem.name &&
+                item.category == targetItem.category &&
+                item.isExpired == targetItem.isExpired &&
+                item.createdAt == targetItem.createdAt &&
+                item.sourceType == targetItem.sourceType
     }
 
     private fun showStockRegisterDialog(item: StockItem) {

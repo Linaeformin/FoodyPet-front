@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/community_item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="22dp">
+
+    <View
+        android:id="@+id/community_item_top_divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="-24dp"
+        android:layout_marginEnd="-24dp"
+        android:background="@color/light_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/community_item_profile_iv"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="24dp"
+        android:contentDescription="프로필 이미지"
+        android:scaleType="centerCrop"
+        android:src="@drawable/cat_1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/community_item_top_divider" />
+
+    <TextView
+        android:id="@+id/community_item_nickname_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:fontFamily="@font/scdream_medium"
+        android:text="냠냠이먹자"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintStart_toEndOf="@id/community_item_profile_iv"
+        app:layout_constraintTop_toTopOf="@id/community_item_profile_iv" />
+
+    <TextView
+        android:id="@+id/community_item_category_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="24dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/bg_stock_category"
+        android:fontFamily="@font/scdream_regular"
+        android:gravity="center"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="고양이"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/community_item_nickname_tv"
+        app:layout_constraintTop_toBottomOf="@id/community_item_nickname_tv" />
+
+    <ImageView
+        android:id="@+id/community_item_menu_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="메뉴"
+        android:src="@drawable/btn_menu"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/community_item_profile_iv" />
+
+    <TextView
+        android:id="@+id/community_item_title_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/scdream_medium"
+        android:text="고양이도 먹는 삼계탕"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toStartOf="@id/community_item_open_meal_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/community_item_profile_iv" />
+
+    <TextView
+        android:id="@+id/community_item_open_meal_btn"
+        android:layout_width="80dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bg_orange_fill_20"
+        android:fontFamily="@font/scdream_regular"
+        android:gravity="center"
+        android:text="식단 열기"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/community_item_title_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/community_item_title_tv"
+        app:layout_constraintVertical_bias="0.411" />
+
+    <ImageView
+        android:id="@+id/community_item_meal_iv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="18dp"
+        android:contentDescription="게시글 이미지"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img_community_meal"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/community_item_title_tv" />
+
+    <LinearLayout
+        android:id="@+id/community_item_content_area"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:baselineAligned="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/community_item_meal_iv">
+
+        <TextView
+            android:id="@+id/community_item_content_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="@font/scdream_regular"
+            android:maxLines="1"
+            android:text="링이한테 고양이 전용 삼계탕을 먹여봤어요!"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/community_item_more_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/scdream_regular"
+            android:text="더보기"
+            android:textColor="@color/gray"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/community_item_heart_iv"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="18dp"
+        android:contentDescription="좋아요"
+        android:src="@drawable/icon_heart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/community_item_content_area" />
+
+    <TextView
+        android:id="@+id/community_item_heart_count_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:fontFamily="@font/scdream_regular"
+        android:text="123"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="@id/community_item_heart_iv"
+        app:layout_constraintStart_toEndOf="@id/community_item_heart_iv"
+        app:layout_constraintTop_toTopOf="@id/community_item_heart_iv" />
+
+    <ImageView
+        android:id="@+id/community_item_comment_iv"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="18dp"
+        android:contentDescription="댓글"
+        android:src="@drawable/icon_comment"
+        app:layout_constraintBottom_toBottomOf="@id/community_item_heart_iv"
+        app:layout_constraintStart_toEndOf="@id/community_item_heart_count_tv"
+        app:layout_constraintTop_toTopOf="@id/community_item_heart_iv" />
+
+    <TextView
+        android:id="@+id/community_item_comment_count_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:fontFamily="@font/scdream_regular"
+        android:text="22"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="@id/community_item_comment_iv"
+        app:layout_constraintStart_toEndOf="@id/community_item_comment_iv"
+        app:layout_constraintTop_toTopOf="@id/community_item_comment_iv" />
+
+    <ImageView
+        android:id="@+id/community_item_bookmark_iv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="북마크"
+        android:src="@drawable/icon_bookmark_unfill"
+        app:layout_constraintBottom_toBottomOf="@id/community_item_heart_iv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/community_item_heart_iv" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
