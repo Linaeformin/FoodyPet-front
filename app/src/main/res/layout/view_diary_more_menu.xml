@@ -14,12 +14,14 @@
         android:paddingHorizontal="20dp">
 
         <ImageView
+            android:id="@+id/menu_edit_iv"
             android:layout_width="22dp"
             android:layout_height="22dp"
             android:src="@drawable/icon_edit"
             android:contentDescription="수정하기" />
 
         <TextView
+            android:id="@+id/menu_edit_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
@@ -43,12 +45,14 @@
         android:paddingHorizontal="20dp">
 
         <ImageView
+            android:id="@+id/menu_delete_iv"
             android:layout_width="22dp"
             android:layout_height="22dp"
             android:src="@drawable/icon_trash"
             android:contentDescription="삭제하기" />
 
         <TextView
+            android:id="@+id/menu_delete_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/comment_item_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="20dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp">
+
+    <!-- 댓글 / 대댓글 전체 컨테이너 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/comment_content_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- 프로필 이미지 -->
+        <ImageView
+            android:id="@+id/comment_profile_iv"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:src="@drawable/cat_1"
+            android:scaleType="centerCrop"
+            android:contentDescription="프로필 이미지"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- 닉네임 -->
+        <TextView
+            android:id="@+id/comment_nickname_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:fontFamily="@font/scdream_medium"
+            android:text="내몸은주둥"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            app:layout_constraintTop_toTopOf="@id/comment_profile_iv"
+            app:layout_constraintStart_toEndOf="@id/comment_profile_iv" />
+
+        <!-- 시간 -->
+        <TextView
+            android:id="@+id/comment_time_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:fontFamily="@font/scdream_regular"
+            android:text="3시간"
+            android:textColor="#888888"
+            android:textSize="11sp"
+            app:layout_constraintBottom_toBottomOf="@id/comment_nickname_tv"
+            app:layout_constraintStart_toEndOf="@id/comment_nickname_tv" />
+
+        <!-- 좋아요 버튼 -->
+        <ImageView
+            android:id="@+id/comment_heart_iv"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/icon_heart"
+            android:contentDescription="좋아요"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintTop_toTopOf="@id/comment_nickname_tv"
+            app:layout_constraintEnd_toStartOf="@id/comment_reply_iv" />
+
+        <!-- 답글 버튼 -->
+        <ImageView
+            android:id="@+id/comment_reply_iv"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/icon_comment"
+            android:contentDescription="답글"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintTop_toTopOf="@id/comment_nickname_tv"
+            app:layout_constraintEnd_toStartOf="@id/comment_menu_iv" />
+
+        <!-- 더보기 버튼 -->
+        <ImageView
+            android:id="@+id/comment_menu_iv"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/btn_menu"
+            android:contentDescription="댓글 메뉴"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintTop_toTopOf="@id/comment_nickname_tv"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 댓글 내용 -->
+        <TextView
+            android:id="@+id/comment_content_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/scdream_regular"
+            android:text="복돼지 치즈볼 어디 간거야?"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:lineSpacingExtra="2dp"
+            app:layout_constraintTop_toBottomOf="@id/comment_nickname_tv"
+            app:layout_constraintStart_toEndOf="@id/comment_profile_iv"
+            app:layout_constraintEnd_toStartOf="@id/comment_menu_iv" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
