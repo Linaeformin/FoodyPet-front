@@ -1,16 +1,21 @@
 package com.example.foodypet.community.fragment
 
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.foodypet.R
 import com.example.foodypet.community.adapter.CommunityPostAdapter
-import com.example.foodypet.community.`enum`.CommunityCategory
+import com.example.foodypet.community.adapter.MealInfoAdapter
 import com.example.foodypet.community.model.CommunityPost
 import com.example.foodypet.community.model.CommunityPostData
+import com.example.foodypet.community.model.MealInfo
+import com.example.foodypet.databinding.DialogMealInfoBinding
 import com.example.foodypet.databinding.FragmentCommunityBinding
 
 class CommunityFragment : Fragment() {
@@ -35,8 +40,6 @@ class CommunityFragment : Fragment() {
         initRecyclerView()
         initClickListener()
 
-        // TODO: 나중에 서버/API/DB에서 게시글 데이터 받아온 뒤 setCommunityPosts(posts) 호출
-        // 지금은 화면 확인용으로만 임시 호출 가능
         setCommunityPosts(CommunityPostData.getCommunityPosts())
     }
 
@@ -46,7 +49,7 @@ class CommunityFragment : Fragment() {
                 // TODO: 메뉴 버튼 클릭 시 처리
             },
             onOpenMealClick = {
-                // TODO: 식단 열기 클릭 시 처리
+                showMealInfoDialog()
             },
             onMoreClick = {
                 // TODO: 더보기 클릭 시 처리
@@ -65,6 +68,50 @@ class CommunityFragment : Fragment() {
     private fun initClickListener() {
         binding.communityAddBtn.setOnClickListener {
             // TODO: 게시글 작성 화면으로 이동
+        }
+    }
+
+    private fun showMealInfoDialog() {
+        val dialog = Dialog(requireContext())
+        val dialogBinding = DialogMealInfoBinding.inflate(layoutInflater)
+
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(dialogBinding.root)
+
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setDimAmount(0.6f)
+
+            val width = (resources.displayMetrics.widthPixels * 0.86).toInt()
+            setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+
+        val mealList = listOf(
+            MealInfo("닭오돌뼈", "10g"),
+            MealInfo("흑돼지 치즈볼", "1봉"),
+            MealInfo("플라그오프", "1개"),
+            MealInfo("어거스트 슈퍼부스트", "10g"),
+            MealInfo("뉴로액트", "10g")
+        )
+
+        val mealInfoAdapter = MealInfoAdapter(mealList)
+
+        dialogBinding.rvMealItems.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = mealInfoAdapter
+        }
+
+        dialogBinding.ivClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+            val width = (resources.displayMetrics.widthPixels * 0.86).toInt()
+            setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
     }
 
