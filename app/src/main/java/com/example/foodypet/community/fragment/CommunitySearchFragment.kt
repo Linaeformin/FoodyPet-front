@@ -4,9 +4,11 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -125,6 +127,7 @@ class CommunitySearchFragment : Fragment() {
         initSearchResultRecyclerView()
         initClickListener()
         initSearchEditText()
+        initKeyword()
     }
 
     private fun initRecentRecyclerView() {
@@ -174,6 +177,16 @@ class CommunitySearchFragment : Fragment() {
         }
     }
 
+    private fun initKeyword() {
+        val keyword = arguments?.getString(SEARCH_KEYWORD_KEY).orEmpty()
+
+        if (keyword.isNotEmpty()) {
+            binding.communitySearchEt.setText(keyword)
+            binding.communitySearchEt.setSelection(keyword.length)
+            showSearchResultView()
+        }
+    }
+
     private fun initSearchEditText() {
         binding.communitySearchEt.requestFocus()
         showKeyboard()
@@ -205,6 +218,24 @@ class CommunitySearchFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
             }
         })
+
+        binding.communitySearchEt.setOnEditorActionListener { _, actionId, event ->
+            val isSearchAction = actionId == EditorInfo.IME_ACTION_SEARCH
+            val isEnterKey = event?.keyCode == KeyEvent.KEYCODE_ENTER &&
+                    event.action == KeyEvent.ACTION_DOWN
+
+            if (isSearchAction || isEnterKey) {
+                val keyword = binding.communitySearchEt.text.toString().trim()
+
+                if (keyword.isNotEmpty()) {
+                    moveToSearchResultFragment(keyword)
+                }
+
+                true
+            } else {
+                false
+            }
+        }
     }
 
     private fun showRecentSearchView() {
@@ -217,6 +248,19 @@ class CommunitySearchFragment : Fragment() {
         binding.communitySearchScrollView.visibility = View.GONE
         binding.communitySearchResultRv.visibility = View.VISIBLE
         searchResultAdapter.setSearchResults(dummySearchResultList)
+    }
+
+    private fun moveToSearchResultFragment(keyword: String) {
+        val fragment = CommunitySearchResultFragment().apply {
+            arguments = Bundle().apply {
+                putString(SEARCH_KEYWORD_KEY, keyword)
+            }
+        }
+
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun showKeyboard() {
@@ -239,5 +283,17 @@ class CommunitySearchFragment : Fragment() {
         binding.communitySearchResultRv.adapter = null
 
         _binding = null
+    }
+
+    companion object {
+        const val SEARCH_KEYWORD_KEY = "keyword"
+
+        fun newInstance(keyword: String = ""): CommunitySearchFragment {
+            return CommunitySearchFragment().apply {
+                arguments = Bundle().apply {
+                    putString(SEARCH_KEYWORD_KEY, keyword)
+                }
+            }
+        }
     }
 }
