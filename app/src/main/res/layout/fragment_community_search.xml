@@ -15,7 +15,7 @@
         android:paddingStart="24dp"
         android:paddingTop="24dp"
         android:paddingEnd="24dp"
-        android:paddingBottom="20dp"
+        android:paddingBottom="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -81,6 +81,7 @@
 
     </LinearLayout>
 
+    <!-- 검색어 입력 전 화면 -->
     <ScrollView
         android:id="@+id/community_search_scroll_view"
         android:layout_width="0dp"
@@ -221,5 +222,17 @@
         </LinearLayout>
 
     </ScrollView>
+
+    <!-- 검색어 입력 후 결과 화면 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/community_search_result_rv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:overScrollMode="never"
+        app:layout_constraintTop_toBottomOf="@id/top_area"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
