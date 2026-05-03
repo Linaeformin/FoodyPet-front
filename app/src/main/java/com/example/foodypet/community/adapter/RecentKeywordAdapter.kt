@@ -7,7 +7,8 @@ import com.example.foodypet.community.model.RecentKeyword
 import com.example.foodypet.databinding.ItemRecentSearchBinding
 
 class RecentKeywordAdapter(
-    private val keywordList: List<RecentKeyword>
+    private val keywordList: List<RecentKeyword>,
+    private val onKeywordClick: (String) -> Unit
 ) : RecyclerView.Adapter<RecentKeywordAdapter.RecentKeywordViewHolder>() {
 
     inner class RecentKeywordViewHolder(
@@ -16,6 +17,10 @@ class RecentKeywordAdapter(
 
         fun bind(keyword: RecentKeyword) {
             binding.recentSearchItemKeywordTv.text = keyword.keyword
+
+            binding.root.setOnClickListener {
+                onKeywordClick(keyword.keyword)
+            }
         }
     }
 

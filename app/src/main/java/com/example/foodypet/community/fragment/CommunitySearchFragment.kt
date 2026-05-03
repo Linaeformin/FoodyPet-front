@@ -126,12 +126,66 @@ class CommunitySearchFragment : Fragment() {
         initRecentRecyclerView()
         initSearchResultRecyclerView()
         initClickListener()
+        initPopularKeywordClickListener()
         initSearchEditText()
         initKeyword()
     }
 
+    private fun initPopularKeywordClickListener() {
+        binding.communitySearchPopularRankingLayout.popularSearchRanking1Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking1Tv.text.toString()))
+        }
+
+        binding.communitySearchPopularRankingLayout.popularSearchRanking2Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking2Tv.text.toString()))
+        }
+
+        binding.communitySearchPopularRankingLayout.popularSearchRanking3Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking3Tv.text.toString()))
+        }
+
+        binding.communitySearchPopularRankingLayout.popularSearchRanking4Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking4Tv.text.toString()))
+        }
+
+        binding.communitySearchPopularRankingLayout.popularSearchRanking5Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking5Tv.text.toString()))
+        }
+
+        binding.communitySearchPopularRankingLayout.popularSearchRanking6Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking6Tv.text.toString()))
+        }
+
+        binding.communitySearchPopularRankingLayout.popularSearchRanking7Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking7Tv.text.toString()))
+        }
+
+        binding.communitySearchPopularRankingLayout.popularSearchRanking8Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking8Tv.text.toString()))
+        }
+
+        binding.communitySearchPopularRankingLayout.popularSearchRanking9Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking9Tv.text.toString()))
+        }
+
+        binding.communitySearchPopularRankingLayout.popularSearchRanking10Layout.setOnClickListener {
+            moveToSearchResultFragment(extractPopularKeyword(binding.communitySearchPopularRankingLayout.popularSearchRanking10Tv.text.toString()))
+        }
+    }
+
+    private fun extractPopularKeyword(text: String): String {
+        return text.substringAfter(".").trim()
+    }
+
     private fun initRecentRecyclerView() {
-        recentProfileAdapter = RecentProfileAdapter(dummyRecentProfileList)
+        recentProfileAdapter = RecentProfileAdapter(
+            profileList = dummyRecentProfileList,
+            onProfileClick = { profile ->
+                // TODO: 최근 프로필 클릭 처리
+                // 예: 프로필 상세 화면으로 이동
+                // moveToProfileFragment(profile.id)
+            }
+        )
 
         binding.communitySearchRecentProfileRv.apply {
             layoutManager = LinearLayoutManager(
@@ -142,7 +196,12 @@ class CommunitySearchFragment : Fragment() {
             adapter = recentProfileAdapter
         }
 
-        recentKeywordAdapter = RecentKeywordAdapter(dummyRecentKeywordList)
+        recentKeywordAdapter = RecentKeywordAdapter(
+            keywordList = dummyRecentKeywordList,
+            onKeywordClick = { keyword ->
+                moveToSearchResultFragment(keyword)
+            }
+        )
 
         binding.communitySearchRecentKeywordRv.apply {
             layoutManager = LinearLayoutManager(
@@ -155,7 +214,17 @@ class CommunitySearchFragment : Fragment() {
     }
 
     private fun initSearchResultRecyclerView() {
-        searchResultAdapter = CommunitySearchResultAdapter(emptyList())
+        searchResultAdapter = CommunitySearchResultAdapter(
+            searchResultList = emptyList(),
+            onKeywordClick = { keyword ->
+                moveToSearchResultFragment(keyword)
+            },
+            onProfileClick = { profile ->
+                // TODO: 다른 사용자 프로필 아이템 클릭 처리
+                // 예: 프로필 상세 화면으로 이동
+                // moveToProfileFragment(profile)
+            }
+        )
 
         binding.communitySearchResultRv.apply {
             layoutManager = LinearLayoutManager(requireContext())

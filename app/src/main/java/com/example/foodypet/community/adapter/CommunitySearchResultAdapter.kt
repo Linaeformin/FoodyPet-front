@@ -8,7 +8,9 @@ import com.example.foodypet.databinding.ItemCommunitySearchKeywordBinding
 import com.example.foodypet.databinding.ItemCommunitySearchProfileBinding
 
 class CommunitySearchResultAdapter(
-    private var searchResultList: List<CommunitySearchResult>
+    private var searchResultList: List<CommunitySearchResult>,
+    private val onKeywordClick: (String) -> Unit,
+    private val onProfileClick: (CommunitySearchResult.Profile) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -22,6 +24,10 @@ class CommunitySearchResultAdapter(
 
         fun bind(item: CommunitySearchResult.Keyword) {
             binding.communitySearchKeywordTv.text = item.keyword
+
+            binding.root.setOnClickListener {
+                onKeywordClick(item.keyword)
+            }
         }
     }
 
@@ -34,6 +40,10 @@ class CommunitySearchResultAdapter(
             binding.communitySearchProfileNicknameTv.text = item.nickname
             binding.communitySearchProfilePetTypeTv.text = item.petType
             binding.communitySearchProfileDescriptionTv.text = item.description
+
+            binding.root.setOnClickListener {
+                onProfileClick(item)
+            }
         }
     }
 

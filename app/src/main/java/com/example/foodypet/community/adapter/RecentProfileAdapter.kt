@@ -7,7 +7,8 @@ import com.example.foodypet.community.model.RecentProfile
 import com.example.foodypet.databinding.ItemRecentProfileBinding
 
 class RecentProfileAdapter(
-    private val profileList: List<RecentProfile>
+    private val profileList: List<RecentProfile>,
+    private val onProfileClick: (RecentProfile) -> Unit
 ) : RecyclerView.Adapter<RecentProfileAdapter.RecentProfileViewHolder>() {
 
     inner class RecentProfileViewHolder(
@@ -17,6 +18,10 @@ class RecentProfileAdapter(
         fun bind(profile: RecentProfile) {
             binding.recentProfileItemPetIv.setImageResource(profile.profileImageRes)
             binding.recentProfileItemNicknameTv.text = profile.nickname
+
+            binding.root.setOnClickListener {
+                onProfileClick(profile)
+            }
         }
     }
 
