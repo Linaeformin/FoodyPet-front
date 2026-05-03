@@ -20,16 +20,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/community_item_profile_iv"
+    <FrameLayout
+        android:id="@+id/community_item_profile_fl"
         android:layout_width="55dp"
         android:layout_height="55dp"
         android:layout_marginTop="24dp"
-        android:contentDescription="프로필 이미지"
-        android:scaleType="centerCrop"
-        android:src="@drawable/cat_1"
+        android:background="@drawable/circle_border"
+        android:padding="1dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/community_item_top_divider" />
+        app:layout_constraintTop_toBottomOf="@id/community_item_top_divider">
+
+        <ImageView
+            android:id="@+id/community_item_profile_iv"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:contentDescription="프로필 이미지"
+            android:scaleType="centerCrop"
+            android:src="@drawable/cat_1" />
+
+    </FrameLayout>
 
     <TextView
         android:id="@+id/community_item_nickname_tv"
@@ -40,8 +49,8 @@
         android:text="냠냠이먹자"
         android:textColor="@color/black"
         android:textSize="14sp"
-        app:layout_constraintStart_toEndOf="@id/community_item_profile_iv"
-        app:layout_constraintTop_toTopOf="@id/community_item_profile_iv" />
+        app:layout_constraintStart_toEndOf="@id/community_item_profile_fl"
+        app:layout_constraintTop_toTopOf="@id/community_item_profile_fl"/>
 
     <TextView
         android:id="@+id/community_item_category_tv"
@@ -66,7 +75,7 @@
         android:contentDescription="메뉴"
         android:src="@drawable/btn_menu"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/community_item_profile_iv" />
+        app:layout_constraintTop_toTopOf="@id/community_item_profile_fl" />
 
     <TextView
         android:id="@+id/community_item_title_tv"
@@ -79,7 +88,7 @@
         android:textSize="15sp"
         app:layout_constraintEnd_toStartOf="@id/community_item_open_meal_btn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/community_item_profile_iv" />
+        app:layout_constraintTop_toBottomOf="@id/community_item_profile_fl" />
 
     <TextView
         android:id="@+id/community_item_open_meal_btn"

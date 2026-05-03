@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.foodypet.R
 import com.example.foodypet.community.adapter.CommunityPostAdapter
 import com.example.foodypet.community.adapter.MealInfoAdapter
 import com.example.foodypet.community.model.CommunityPost
@@ -69,6 +70,27 @@ class CommunityFragment : Fragment() {
     private fun initClickListener() {
         binding.communityAddBtn.setOnClickListener {
             // TODO: 게시글 작성 화면으로 이동
+        }
+
+        binding.searchArea.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, CommunitySearchFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.stockSearchEt.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, CommunitySearchFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.stockSearchIv.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, CommunitySearchFragment())
+                .addToBackStack(null)
+                .commit()
         }
     }
 

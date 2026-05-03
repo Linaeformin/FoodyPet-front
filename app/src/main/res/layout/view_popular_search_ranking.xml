@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/popular_search_ranking_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_lightgray_fill_16"
+    android:paddingStart="28dp"
+    android:paddingTop="24dp"
+    android:paddingEnd="28dp"
+    android:paddingBottom="24dp">
+
+    <LinearLayout
+        android:id="@+id/popular_search_ranking_left_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toStartOf="@id/popular_search_ranking_right_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_1_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_1_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="1. 고양이"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_1_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_up_popular" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_2_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_2_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="2. 강아지"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_2_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_up_popular" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_3_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_3_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="3. 보양식"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_3_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_down_popular" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_4_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_4_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="4. 식단"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_4_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_down_popular" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_5_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_5_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="5. 영양제"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_5_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_down_popular" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/popular_search_ranking_right_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/popular_search_ranking_left_layout"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_6_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_6_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="6. 생식"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_6_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_up_popular" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_7_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_7_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="7. 습식"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_7_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_up_popular" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_8_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_8_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="8. 화식"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_8_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_up_popular" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_9_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_9_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="9. 사료"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_9_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_down_popular" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/popular_search_ranking_10_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/popular_search_ranking_10_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_medium"
+                android:text="10. 식판"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/popular_search_ranking_10_iv"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/icon_up_popular" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

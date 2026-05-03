@@ -81,7 +81,7 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:contentDescription="검색"
-            android:src="@drawable/icon_search_black"
+            android:src="@drawable/icon_search_darkgray"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
