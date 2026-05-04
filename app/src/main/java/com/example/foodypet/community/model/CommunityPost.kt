@@ -13,5 +13,6 @@ data class CommunityPost(
     var likeCount: Int,
     val commentCount: Int,
     var isLiked: Boolean = false,
-    var isBookmarked: Boolean = false
+    var isBookmarked: Boolean = false,
+    val isMyPost: Boolean = false
 )

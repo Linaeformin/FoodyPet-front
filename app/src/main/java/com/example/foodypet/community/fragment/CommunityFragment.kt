@@ -18,6 +18,8 @@ import com.example.foodypet.community.model.CommunityPostData
 import com.example.foodypet.community.model.MealInfo
 import com.example.foodypet.databinding.DialogMealInfoBinding
 import com.example.foodypet.databinding.FragmentCommunityBinding
+import android.widget.PopupWindow
+import com.example.foodypet.databinding.ViewCommunityProfileMoreMenuBinding
 
 class CommunityFragment : Fragment() {
 
@@ -46,16 +48,25 @@ class CommunityFragment : Fragment() {
 
     private fun initRecyclerView() {
         communityPostAdapter = CommunityPostAdapter(
-            onMenuClick = {
-                // TODO: 메뉴 버튼 클릭 시 처리
+            onMenuClick = { post, anchorView ->
+                showPostMoreMenu(post, anchorView)
             },
-            onOpenMealClick = {
+            onProfileClick = { post ->
+                parentFragmentManager.beginTransaction()
+                    .replace(
+                        R.id.fragment_container,
+                        CommunityProfileFragment.newInstance(false)
+                    )
+                    .addToBackStack(null)
+                    .commit()
+            },
+            onOpenMealClick = { post ->
                 showMealInfoDialog()
             },
-            onMoreClick = {
+            onMoreClick = { post ->
                 // TODO: 더보기 클릭 시 처리
             },
-            onCommentClick = {
+            onCommentClick = { post ->
                 val commentBottomSheet = CommentBottomSheetFragment()
                 commentBottomSheet.show(parentFragmentManager, "CommentBottomSheet")
             }
@@ -67,7 +78,69 @@ class CommunityFragment : Fragment() {
         }
     }
 
+    private fun showPostMoreMenu(post: CommunityPost, anchorView: View) {
+        val menuBinding = ViewCommunityProfileMoreMenuBinding.inflate(layoutInflater)
+
+        val popupWindow = PopupWindow(
+            menuBinding.root,
+            dpToPx(110),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        ).apply {
+            isOutsideTouchable = true
+            elevation = dpToPx(4).toFloat()
+            width = dpToPx(110)
+            height = ViewGroup.LayoutParams.WRAP_CONTENT
+        }
+
+        if (post.isMyPost) {
+            menuBinding.menuBlockTv.text = "수정하기"
+            menuBinding.menuAlarmTv.text = "삭제하기"
+            menuBinding.menuAlarmLayout.visibility = View.VISIBLE
+
+            menuBinding.menuBlockLayout.setOnClickListener {
+                popupWindow.dismiss()
+
+                // TODO: 게시글 수정 화면으로 이동
+            }
+
+            menuBinding.menuAlarmLayout.setOnClickListener {
+                popupWindow.dismiss()
+
+                // TODO: 게시글 삭제 처리
+            }
+        } else {
+            menuBinding.menuBlockTv.text = "차단하기"
+            menuBinding.menuAlarmLayout.visibility = View.GONE
+
+            menuBinding.menuBlockLayout.setOnClickListener {
+                popupWindow.dismiss()
+
+                // TODO: 사용자 차단 처리
+            }
+        }
+
+        popupWindow.showAsDropDown(
+            anchorView,
+            -dpToPx(95),
+            dpToPx(6)
+        )
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
     private fun initClickListener() {
+        binding.communityProfile.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(
+                    R.id.fragment_container,
+                    CommunityProfileFragment.newInstance(true)
+                )
+                .addToBackStack(null)
+                .commit()
+        }
+
         binding.communityAddBtn.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, CommunityPostWriteFragment())

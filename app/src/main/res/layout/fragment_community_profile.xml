@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/top_area"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/meal_back_iv"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="뒤로가기"
+                android:src="@drawable/btn_arrow_left" />
+
+            <TextView
+                android:id="@+id/meal_title_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="@font/scdream_bold"
+                android:text="nyamnyam"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/meal_more_iv"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="더보기"
+                android:src="@drawable/btn_menu"
+                android:visibility="visible" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/community_profile_img_iv"
+        android:layout_width="112dp"
+        android:layout_height="112dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/circle_border"
+        android:clipToOutline="true"
+        android:contentDescription="프로필 이미지"
+        android:scaleType="centerCrop"
+        android:src="@drawable/cat_2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_area" />
+
+    <TextView
+        android:id="@+id/community_item_nickname_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/scdream_medium"
+        android:text="냠냠이먹자"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@id/community_profile_img_iv"
+        app:layout_constraintTop_toTopOf="@id/community_profile_img_iv" />
+
+    <TextView
+        android:id="@+id/community_item_category_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="24dp"
+        android:background="@drawable/bg_stock_category"
+        android:fontFamily="@font/scdream_regular"
+        android:gravity="center"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:layout_marginStart="12dp"
+        android:text="고양이"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@id/community_item_nickname_tv"
+        app:layout_constraintTop_toTopOf="@id/community_item_nickname_tv" />
+
+    <TextView
+        android:id="@+id/community_profile_record_count_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/scdream_regular"
+        android:text="식단 기록 102개"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/community_item_nickname_tv"
+        app:layout_constraintTop_toBottomOf="@id/community_item_category_tv" />
+
+    <TextView
+        android:id="@+id/community_profile_following_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/scdream_regular"
+        android:text="30 팔로잉"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/community_item_nickname_tv"
+        app:layout_constraintTop_toBottomOf="@id/community_profile_record_count_tv" />
+
+    <TextView
+        android:id="@+id/community_profile_follower_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:fontFamily="@font/scdream_regular"
+        android:text="13 팔로워"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        app:layout_constraintBaseline_toBaselineOf="@id/community_profile_following_tv"
+        app:layout_constraintStart_toEndOf="@id/community_profile_following_tv" />
+
+    <LinearLayout
+        android:id="@+id/community_profile_btn_area"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="2dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@id/community_profile_img_iv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/community_profile_img_iv">
+
+        <TextView
+            android:id="@+id/community_profile_edit_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_orange_stroke_4"
+            android:fontFamily="@font/scdream_regular"
+            android:gravity="center"
+            android:text="프로필 편집"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/community_profile_link_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_orange_stroke_4"
+            android:fontFamily="@font/scdream_regular"
+            android:gravity="center"
+            android:text="프로필 링크"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/community_profile_intro_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="24dp"
+        android:fontFamily="@font/scdream_light"
+        android:lineSpacingExtra="5dp"
+        android:text="고양이 ‘랑이’와 함께 밥 먹는 계정입니다! 스트릿 출신, 그루밍 잘하고 정말 동글동글한 동그’랑이’랑 함께하실 분!"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/community_profile_img_iv" />
+
+    <LinearLayout
+        android:id="@+id/community_profile_tab_area"
+        android:layout_width="0dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="28dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/community_profile_intro_tv">
+
+        <FrameLayout
+            android:id="@+id/community_profile_home_tab"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="2dp"
+            android:background="@drawable/bg_community_tab_select">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:contentDescription="홈 탭"
+                android:src="@drawable/icon_white_home" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/community_profile_heart_tab"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="2dp"
+            android:background="@drawable/bg_community_tab_unselect">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:contentDescription="좋아요 탭"
+                android:src="@drawable/icon_white_heart" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/community_profile_bookmark_tab"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_community_tab_unselect">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:contentDescription="북마크 탭"
+                android:src="@drawable/icon_white_bookmark" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/community_profile_post_rv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/community_profile_tab_area"
+        app:spanCount="3"
+        tools:itemCount="12"
+        tools:listitem="@layout/item_community_search_post" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
