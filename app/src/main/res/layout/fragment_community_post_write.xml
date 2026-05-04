@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/community_post_write_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- 상단 바 -->
+    <LinearLayout
+        android:id="@+id/top_area"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/post_back_iv"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="뒤로가기"
+                android:src="@drawable/btn_arrow_left" />
+
+            <TextView
+                android:id="@+id/post_title_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="@font/scdream_bold"
+                android:text="게시글 작성"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/post_more_iv"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="더보기"
+                android:src="@drawable/btn_menu"
+                android:visibility="gone" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <!-- 내용 영역 -->
+    <LinearLayout
+        android:id="@+id/post_content_area"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        app:layout_constraintBottom_toTopOf="@id/post_bottom_button_area"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_area">
+
+        <!-- 제목 입력 영역 -->
+        <LinearLayout
+            android:id="@+id/post_title_input_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="43dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/post_title_label_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/scdream_medium"
+                android:text="제목"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <View
+                android:id="@+id/post_title_divider_view"
+                android:layout_width="1dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="14dp"
+                android:background="#DDDDDD" />
+
+            <EditText
+                android:id="@+id/post_title_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:fontFamily="@font/scdream_light"
+                android:hint="제목을 입력하세요."
+                android:includeFontPadding="false"
+                android:inputType="text"
+                android:padding="0dp"
+                android:textColor="@color/black"
+                android:textColorHint="#BDBDBD"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <!-- 이미지 업로드 영역 : 이미지 선택 전 -->
+        <FrameLayout
+            android:id="@+id/post_image_upload_area"
+            android:layout_width="match_parent"
+            android:layout_height="310dp"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/bg_orange_stroke_16"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/post_image_icon_iv"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center"
+                android:contentDescription="이미지 추가"
+                android:src="@drawable/icon_image" />
+        </FrameLayout>
+
+        <!-- 이미지 프리뷰 영역 : 이미지 선택 후 -->
+        <FrameLayout
+            android:id="@+id/post_image_preview_area"
+            android:layout_width="match_parent"
+            android:layout_height="310dp"
+            android:layout_marginTop="28dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/post_image_vp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:overScrollMode="never" />
+        </FrameLayout>
+
+        <!-- 이미지 인디케이터 : 이미지 여러 장일 때만 visible -->
+        <LinearLayout
+            android:id="@+id/post_indicator_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="14dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- 본문 입력 -->
+        <EditText
+            android:id="@+id/post_content_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:background="@android:color/transparent"
+            android:fontFamily="@font/scdream_light"
+            android:gravity="top"
+            android:hint="본문을 입력하세요."
+            android:includeFontPadding="false"
+            android:inputType="textMultiLine"
+            android:minHeight="120dp"
+            android:padding="0dp"
+            android:textColor="@color/black"
+            android:textColorHint="#BDBDBD"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <!-- 하단 버튼 영역 -->
+    <LinearLayout
+        android:id="@+id/post_bottom_button_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="18dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="42dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <FrameLayout
+            android:layout_width="280dp"
+            android:layout_height="54dp"
+            android:layout_gravity="center"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingBottom="4dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_gravity="top"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_bottom_button_shadow" />
+
+            <TextView
+                android:id="@+id/btn_connect_meal"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:background="@drawable/bg_orange_stroke_16"
+                android:fontFamily="@font/scdream_light"
+                android:gravity="center"
+                android:text="식단 연결하기"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/btn_register_post"
+            android:layout_width="280dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_orange_fill_16"
+            android:fontFamily="@font/scdream_light"
+            android:gravity="center"
+            android:text="등록하기"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

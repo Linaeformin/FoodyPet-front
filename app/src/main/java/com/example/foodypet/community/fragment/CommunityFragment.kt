@@ -69,7 +69,10 @@ class CommunityFragment : Fragment() {
 
     private fun initClickListener() {
         binding.communityAddBtn.setOnClickListener {
-            // TODO: 게시글 작성 화면으로 이동
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, CommunityPostWriteFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.searchArea.setOnClickListener {
