@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/connect_meal_bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_stock_sort_bottom_sheet"
+    android:paddingStart="36dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="40dp"
+    android:paddingEnd="28dp">
+
+    <TextView
+        android:id="@+id/tv_connect_meal_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:fontFamily="@font/scdream_medium"
+        android:text="식단 연결하기"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <LinearLayout
+        android:id="@+id/layout_pet_name"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="26dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_name_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/scdream_medium"
+            android:text="이름:"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+        <AutoCompleteTextView
+            android:id="@+id/pet_name_dropdown_actv"
+            android:layout_width="70dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_unit_dropdown"
+            android:popupBackground="@drawable/bg_dropdown_popup"
+            android:dropDownVerticalOffset="4dp"
+            android:drawableEnd="@drawable/btn_arrow_bottom"
+            android:drawablePadding="4dp"
+            android:focusable="false"
+            android:clickable="true"
+            android:fontFamily="@font/scdream_light"
+            android:gravity="center"
+            android:inputType="none"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="랑이"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_feed_date"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_feed_date_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/scdream_medium"
+            android:text="급여일:"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tv_selected_feed_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="@font/scdream_light"
+            android:text="급여일을 선택해주세요."
+            android:textColor="#B8B8B8"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_feed_time"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_feed_time_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/scdream_medium"
+            android:text="급여 시간:"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="60dp"
+            android:layout_height="1dp"
+            android:background="@color/gray"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="7dp"
+            android:visibility="gone"/>
+
+        <AutoCompleteTextView
+            android:id="@+id/feed_time_dropdown_actv"
+            android:layout_width="80dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_unit_dropdown"
+            android:popupBackground="@drawable/bg_dropdown_popup"
+            android:dropDownVerticalOffset="4dp"
+            android:drawableEnd="@drawable/btn_arrow_bottom"
+            android:drawablePadding="4dp"
+            android:focusable="false"
+            android:clickable="true"
+            android:fontFamily="@font/scdream_light"
+            android:gravity="center"
+            android:inputType="none"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="18:00"
+            android:visibility="visible"
+            android:textColor="@color/black"
+            android:textColorHint="#B8B8B8"
+            android:textSize="15sp" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/btn_search_meal"
+            android:layout_width="92dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_orange_light_5"
+            android:fontFamily="@font/scdream_light"
+            android:gravity="center"
+            android:text="조회하기"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_connected_meal_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="visible">
+
+        <ImageView
+            android:id="@+id/iv_meal_image"
+            android:layout_width="124dp"
+            android:layout_height="124dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_meal" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="124dp"
+            android:layout_marginStart="18dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_meal_description"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/scdream_light"
+                android:gravity="top"
+                android:lineSpacingExtra="2dp"
+                android:text="흑돼지 치즈볼 1개, 닭오돌뼈 10g, 플라그오프, 아가스틴 슈퍼부스트, 뉴로액트, 도란도란 단호박"
+                android:textColor="@color/black"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/btn_connect_meal"
+                android:layout_width="86dp"
+                android:layout_height="34dp"
+                android:layout_gravity="end"
+                android:background="@drawable/bg_orange_fill_16"
+                android:fontFamily="@font/scdream_medium"
+                android:gravity="center"
+                android:text="연결하기"
+                android:textColor="@color/black"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

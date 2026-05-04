@@ -1,5 +1,7 @@
 package com.example.foodypet
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.example.foodypet.community.fragment.CommunityFragment
 import com.example.foodypet.home.fragment.HomeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -64,5 +67,16 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val locale = Locale.KOREA
+        Locale.setDefault(locale)
+
+        val config = Configuration(newBase.resources.configuration)
+        config.setLocale(locale)
+
+        val context = newBase.createConfigurationContext(config)
+        super.attachBaseContext(context)
     }
 }

@@ -114,7 +114,13 @@ class CommunityPostWriteFragment : Fragment() {
         }
 
         binding.btnConnectMeal.setOnClickListener {
-            // TODO: 식단 연결 기능 연결
+            val bottomSheet = ConnectMealBottomSheet(
+                onMealConnected = {
+                    binding.btnConnectMeal.text = "식단 연결 수정"
+                }
+            )
+
+            bottomSheet.show(parentFragmentManager, "ConnectMealBottomSheet")
         }
 
         binding.btnRegisterPost.setOnClickListener {
