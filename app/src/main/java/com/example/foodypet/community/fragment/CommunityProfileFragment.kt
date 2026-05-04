@@ -12,6 +12,7 @@ import com.example.foodypet.community.model.CommunityProfilePost
 import com.example.foodypet.databinding.FragmentCommunityProfileBinding
 import android.view.Gravity
 import android.widget.PopupWindow
+import com.example.foodypet.community.enum.CommunityUserListType
 import com.example.foodypet.databinding.ViewCommunityProfileMoreMenuBinding
 
 class CommunityProfileFragment : Fragment() {
@@ -43,6 +44,7 @@ class CommunityProfileFragment : Fragment() {
 
         initTopArea()
         initProfileMode()
+        initFollowCountClick()
         initTabs()
         initRecyclerView()
     }
@@ -54,6 +56,14 @@ class CommunityProfileFragment : Fragment() {
             dpToPx(110),
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
+
+        if (isMyProfile) {
+            menuBinding.menuBlockTv.text = "차단한 사용자"
+            menuBinding.menuAlarmLayout.visibility = View.VISIBLE
+        } else {
+            menuBinding.menuBlockTv.text = "차단하기"
+            menuBinding.menuAlarmLayout.visibility = View.GONE
+        }
 
         val popupWindow = PopupWindow(
             menuBinding.root,
@@ -69,12 +79,22 @@ class CommunityProfileFragment : Fragment() {
 
         menuBinding.menuBlockLayout.setOnClickListener {
             popupWindow.dismiss()
-            // TODO: 차단한 사용자 화면으로 이동
+
+            if (isMyProfile) {
+                CommunityUserListBottomSheet.newInstance(
+                    CommunityUserListType.BLOCKED
+                ).show(parentFragmentManager, "CommunityBlockedBottomSheet")
+            } else {
+                blockUser()
+            }
         }
 
         menuBinding.menuAlarmLayout.setOnClickListener {
             popupWindow.dismiss()
-            // TODO: 알림 설정 화면으로 이동
+
+            CommunityUserListBottomSheet.newInstance(
+                CommunityUserListType.NOTIFICATION
+            ).show(parentFragmentManager, "CommunityNotificationBottomSheet")
         }
 
         popupWindow.showAsDropDown(
@@ -82,6 +102,12 @@ class CommunityProfileFragment : Fragment() {
             -dpToPx(95),
             dpToPx(6)
         )
+    }
+
+    private fun blockUser() {
+        // TODO: 서버 연결 후 차단하기 API 호출
+
+        parentFragmentManager.popBackStack()
     }
 
     private fun dpToPx(dp: Int): Int {
@@ -104,11 +130,7 @@ class CommunityProfileFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.mealMoreIv.visibility = if (isMyProfile) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+        binding.mealMoreIv.visibility = View.VISIBLE
 
         binding.mealMoreIv.setOnClickListener {
             showMoreMenu()
@@ -150,6 +172,20 @@ class CommunityProfileFragment : Fragment() {
 
         binding.communityProfileLinkBtn.setOnClickListener {
             // TODO: 프로필 링크 복사 또는 공유
+        }
+    }
+
+    private fun initFollowCountClick() {
+        binding.communityProfileFollowingTv.setOnClickListener {
+            CommunityUserListBottomSheet.newInstance(
+                CommunityUserListType.FOLLOWING
+            ).show(parentFragmentManager, "CommunityFollowingBottomSheet")
+        }
+
+        binding.communityProfileFollowerTv.setOnClickListener {
+            CommunityUserListBottomSheet.newInstance(
+                CommunityUserListType.FOLLOWER
+            ).show(parentFragmentManager, "CommunityFollowerBottomSheet")
         }
     }
 

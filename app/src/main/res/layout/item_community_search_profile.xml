@@ -9,10 +9,10 @@
         android:id="@+id/community_search_profile_iv"
         android:layout_width="60dp"
         android:layout_height="60dp"
+        android:layout_marginStart="12dp"
         android:contentDescription="프로필 이미지"
         android:scaleType="centerCrop"
         android:src="@drawable/cat_1"
-        android:layout_marginStart="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,12 +21,12 @@
         android:id="@+id/community_search_profile_nickname_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/scdream_medium"
         android:text="내꿈은츄르"
         android:textColor="@color/black"
         android:textSize="15sp"
-        android:layout_marginTop="8dp"
         app:layout_constraintStart_toEndOf="@id/community_search_profile_iv"
         app:layout_constraintTop_toTopOf="@id/community_search_profile_iv" />
 
@@ -55,10 +55,39 @@
         android:fontFamily="@font/scdream_regular"
         android:text="우리집냥 님 외 23명이 팔로우합니다."
         android:textColor="@color/dark_gray"
-        android:textSize="13sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@id/community_search_follow_btn"
         app:layout_constraintStart_toStartOf="@id/community_search_profile_nickname_tv"
         app:layout_constraintTop_toBottomOf="@id/community_search_profile_nickname_tv" />
+
+    <TextView
+        android:id="@+id/community_search_follow_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:background="@drawable/bg_orange_fill_16"
+        android:fontFamily="@font/scdream_regular"
+        android:gravity="center"
+        android:text="팔로우"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        android:visibility="gone"
+        android:paddingHorizontal="15dp"
+        app:layout_constraintBottom_toBottomOf="@id/community_search_profile_iv"
+        app:layout_constraintEnd_toStartOf="@id/community_search_menu_btn"
+        app:layout_constraintTop_toTopOf="@id/community_search_profile_iv" />
+
+    <ImageView
+        android:id="@+id/community_search_menu_btn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="4dp"
+        android:contentDescription="메뉴"
+        android:padding="6dp"
+        android:src="@drawable/btn_menu"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/community_search_profile_iv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/community_search_profile_iv" />
 
     <View
         android:id="@+id/community_search_profile_divider"
