@@ -152,7 +152,10 @@ class CommunityProfileFragment : Fragment() {
         binding.communityProfileLinkBtn.text = "프로필 링크"
 
         binding.communityProfileEditBtn.setOnClickListener {
-            // TODO: 프로필 편집 화면으로 이동
+            CommunityProfileEditCompleteDialog().show(
+                parentFragmentManager,
+                "CommunityProfileEditCompleteDialog"
+            )
         }
 
         binding.communityProfileLinkBtn.setOnClickListener {
