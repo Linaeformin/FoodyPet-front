@@ -30,4 +30,5 @@
     <string name="all_food">식단 전체보기</string>
     <string name="make_food">오늘의 식단 만들기</string>
     <string name="time">12:00</string>
+    <string name="mypage_logout"><u>로그아웃</u></string>
 </resources>

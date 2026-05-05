@@ -11,6 +11,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import com.example.foodypet.community.fragment.CommunityFragment
 import com.example.foodypet.home.fragment.HomeFragment
+import com.example.foodypet.mypage.fragment.MypageFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.Locale
 
