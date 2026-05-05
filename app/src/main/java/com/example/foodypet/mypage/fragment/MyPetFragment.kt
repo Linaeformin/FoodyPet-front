@@ -89,13 +89,13 @@ class MyPetFragment : Fragment() {
         myPetAdapter = MyPetAdapter(
             petList = petList,
             onEditClick = {
-                // 지금은 아무 기능 안 넣음
+                openPetRegisterFragment(PetRegisterFragment.MODE_EDIT)
             },
             onDeleteClick = { pet ->
                 showDeletePetDialog(pet)
             },
             onAddClick = {
-                // 지금은 아무 기능 안 넣음
+                openPetRegisterFragment(PetRegisterFragment.MODE_REGISTER)
             }
         )
 
@@ -110,6 +110,16 @@ class MyPetFragment : Fragment() {
                 }
             }
         )
+    }
+
+    private fun openPetRegisterFragment(mode: String) {
+        parentFragmentManager.beginTransaction()
+            .replace(
+                R.id.fragment_container, // 실제 컨테이너 id로 바꿔줘
+                PetRegisterFragment.newInstance(mode)
+            )
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun showDeletePetDialog(pet: MyPet) {
