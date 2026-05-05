@@ -10,7 +10,7 @@ import com.example.foodypet.mypage.model.MyPet
 import com.example.foodypet.mypage.model.PetGender
 
 class MyPetAdapter(
-    private val petList: List<MyPet>,
+    private val petList: MutableList<MyPet>,
     private val onEditClick: (MyPet) -> Unit,
     private val onDeleteClick: (MyPet) -> Unit,
     private val onAddClick: () -> Unit
@@ -65,6 +65,15 @@ class MyPetAdapter(
 
     override fun getItemCount(): Int {
         return petList.size + 1
+    }
+
+    fun removePet(pet: MyPet) {
+        val index = petList.indexOf(pet)
+
+        if (index != -1) {
+            petList.removeAt(index)
+            notifyDataSetChanged()
+        }
     }
 
     inner class MyPetViewHolder(

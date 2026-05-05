@@ -21,7 +21,7 @@ class MyPetFragment : Fragment() {
 
     private lateinit var myPetAdapter: MyPetAdapter
 
-    private val petList = listOf(
+    private val petList = mutableListOf(
         MyPet(
             name = "랑이",
             birth = "2022.04.07 생",
@@ -75,7 +75,6 @@ class MyPetFragment : Fragment() {
         setupTopBar()
         setupViewPager()
 
-        // 반려동물 개수 + 등록 카드 1개까지 포함
         setupIndicators(myPetAdapter.itemCount)
         updateIndicator(0)
     }
@@ -89,15 +88,14 @@ class MyPetFragment : Fragment() {
     private fun setupViewPager() {
         myPetAdapter = MyPetAdapter(
             petList = petList,
-            onEditClick = { pet ->
-                // TODO: 프로필 수정 화면으로 이동
-                // 예: findNavController().navigate(...)
+            onEditClick = {
+                // 지금은 아무 기능 안 넣음
             },
             onDeleteClick = { pet ->
-                // TODO: 삭제 다이얼로그 또는 삭제 API 연결
+                showDeletePetDialog(pet)
             },
             onAddClick = {
-
+                // 지금은 아무 기능 안 넣음
             }
         )
 
@@ -112,6 +110,29 @@ class MyPetFragment : Fragment() {
                 }
             }
         )
+    }
+
+    private fun showDeletePetDialog(pet: MyPet) {
+        val dialog = DialogDeletePetFragment(
+            onConfirmDelete = {
+                refreshAfterDelete(pet)
+            }
+        )
+
+        dialog.show(parentFragmentManager, "DialogDeletePetFragment")
+    }
+
+    private fun refreshAfterDelete(pet: MyPet) {
+        myPetAdapter.removePet(pet)
+
+        setupIndicators(myPetAdapter.itemCount)
+
+        val currentPosition = binding.myPetViewPager.currentItem
+        val lastPosition = myPetAdapter.itemCount - 1
+        val newPosition = currentPosition.coerceAtMost(lastPosition)
+
+        binding.myPetViewPager.setCurrentItem(newPosition, false)
+        updateIndicator(newPosition)
     }
 
     private fun setupIndicators(count: Int) {

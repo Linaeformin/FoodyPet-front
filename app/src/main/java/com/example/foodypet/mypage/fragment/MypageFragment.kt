@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentMypageBinding
+import com.example.foodypet.ui.mypage.LogoutDialog
 
 class MypageFragment : Fragment() {
 
@@ -28,6 +29,34 @@ class MypageFragment : Fragment() {
 
         setLogoutUnderline()
         setClickListeners()
+
+        // TODO: 나중에 서버 응답 데이터로 교체
+        val petList = emptyList<String>()
+
+        setPetPreview(petList)
+    }
+
+    private fun setPetPreview(petList: List<String>) {
+        if (petList.isEmpty()) {
+            binding.mypagePetImgArea.visibility = View.GONE
+            binding.mypagePetMoreCountTv.text = "반려동물 등록하기"
+            binding.mypagePetMoreCountTv.setTextColor(
+                requireContext().getColor(R.color.dark_gray)
+            )
+        } else {
+            binding.mypagePetImgArea.visibility = View.VISIBLE
+
+            binding.mypagePetMoreCountTv.setTextColor(
+                requireContext().getColor(R.color.black)
+            )
+
+            binding.mypagePetMoreCountTv.text =
+                if (petList.size > 3) {
+                    "+ ${petList.size - 3}"
+                } else {
+                    ""
+                }
+        }
     }
 
     private fun setLogoutUnderline() {
@@ -37,10 +66,11 @@ class MypageFragment : Fragment() {
 
     private fun setClickListeners() {
         binding.mypagePetManageBtn.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, MyPetFragment())
-                .addToBackStack(null)
-                .commit()
+            moveToMyPetFragment()
+        }
+
+        binding.mypagePetMoreCountTv.setOnClickListener {
+            moveToMyPetFragment()
         }
 
         binding.mypageMealRecordManageBtn.setOnClickListener {
@@ -60,8 +90,15 @@ class MypageFragment : Fragment() {
         }
 
         binding.mypageLogoutBtn.setOnClickListener {
-            // TODO: 로그아웃 처리
+            LogoutDialog().show(parentFragmentManager, "LogoutDialog")
         }
+    }
+
+    private fun moveToMyPetFragment() {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, MyPetFragment())
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onDestroyView() {
