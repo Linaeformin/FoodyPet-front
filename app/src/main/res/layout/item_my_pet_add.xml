@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/my_pet_add_page_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 작은 등록 카드 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/my_pet_add_card_root"
+        android:layout_width="match_parent"
+        android:layout_height="190dp"
+        android:background="@drawable/bg_orange_stroke_20"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/my_pet_add_content_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <FrameLayout
+                android:id="@+id/my_pet_add_circle_area"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_food_add_circle">
+
+                <TextView
+                    android:id="@+id/my_pet_add_plus_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@font/scdream_regular"
+                    android:gravity="center"
+                    android:text="+"
+                    android:textColor="@color/deep_orange"
+                    android:textSize="28sp" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/my_pet_add_text_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:fontFamily="@font/scdream_medium"
+                android:text="반려동물 등록"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

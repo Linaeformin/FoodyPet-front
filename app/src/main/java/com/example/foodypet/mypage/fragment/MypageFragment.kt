@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentMypageBinding
 
 class MypageFragment : Fragment() {
@@ -36,7 +37,10 @@ class MypageFragment : Fragment() {
 
     private fun setClickListeners() {
         binding.mypagePetManageBtn.setOnClickListener {
-            // TODO: 반려동물 관리 화면으로 이동
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, MyPetFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.mypageMealRecordManageBtn.setOnClickListener {

@@ -78,7 +78,7 @@
                 android:fontFamily="@font/scdream_regular"
                 android:text="반려동물 관리"
                 android:textColor="@color/black"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -147,7 +147,7 @@
                 android:fontFamily="@font/scdream_regular"
                 android:text="+ 2"
                 android:textColor="@color/black"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -168,7 +168,7 @@
             android:paddingEnd="36dp"
             android:text="밥 일기 관리"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/mypage_push_alarm_btn"
@@ -184,7 +184,7 @@
             android:paddingEnd="36dp"
             android:text="푸시 알림"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/mypage_inquiry_btn"
@@ -200,7 +200,7 @@
             android:paddingEnd="36dp"
             android:text="문의하기"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/mypage_password_change_btn"
@@ -216,7 +216,7 @@
             android:paddingEnd="36dp"
             android:text="비밀번호 변경하기"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
     </LinearLayout>
 
