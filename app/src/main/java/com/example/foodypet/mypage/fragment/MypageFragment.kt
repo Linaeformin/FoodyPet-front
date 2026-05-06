@@ -81,15 +81,33 @@ class MypageFragment : Fragment() {
         }
 
         binding.mypagePushAlarmBtn.setOnClickListener {
-            // TODO: 푸시 알림 설정 화면으로 이동
+            parentFragmentManager.beginTransaction()
+                .replace(
+                    R.id.fragment_container,
+                    MypagePushAlarmFragment()
+                )
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.mypageInquiryBtn.setOnClickListener {
-            // TODO: 문의하기 화면으로 이동
+            parentFragmentManager.beginTransaction()
+                .replace(
+                    R.id.fragment_container,
+                    MypageInquiryFragment()
+                )
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.mypagePasswordChangeBtn.setOnClickListener {
-            // TODO: 비밀번호 변경 화면으로 이동
+            parentFragmentManager.beginTransaction()
+                .replace(
+                    R.id.fragment_container,
+                    MypagePasswordChangeFragment()
+                )
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.mypageLogoutBtn.setOnClickListener {
