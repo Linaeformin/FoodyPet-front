@@ -32,6 +32,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     buildFeatures {
@@ -51,5 +52,7 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("androidx.gridlayout:gridlayout:1.0.0")
+    implementation("com.kizitonwose.calendar:view:2.6.2")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
 

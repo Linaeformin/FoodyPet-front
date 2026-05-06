@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mypage_meal_diary_calendar_header_area"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp">
+
+    <ImageView
+        android:id="@+id/mypage_meal_diary_calendar_prev_iv"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="이전 달"
+        android:src="@drawable/btn_arrow_left" />
+
+    <TextView
+        android:id="@+id/mypage_meal_diary_calendar_month_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:fontFamily="@font/scdream_bold"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        tools:text="2024년 8월" />
+
+    <ImageView
+        android:id="@+id/mypage_meal_diary_calendar_next_iv"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="다음 달"
+        android:src="@drawable/btn_arrow_right" />
+
+</RelativeLayout>

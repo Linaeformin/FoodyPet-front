@@ -74,7 +74,10 @@ class MypageFragment : Fragment() {
         }
 
         binding.mypageMealRecordManageBtn.setOnClickListener {
-            // TODO: 밥 일기 관리 화면으로 이동
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, MypageMealDiaryListFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.mypagePushAlarmBtn.setOnClickListener {
