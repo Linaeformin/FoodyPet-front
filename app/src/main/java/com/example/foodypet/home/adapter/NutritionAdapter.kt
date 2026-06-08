@@ -35,17 +35,20 @@ class NutritionAdapter(
                 )
 
                 capsuleBinding.capsuleIv.setOnClickListener {
-                    val currentCount = items[position].takenCount
+                    val adapterPosition = bindingAdapterPosition
+                    if (adapterPosition == RecyclerView.NO_POSITION) return@setOnClickListener
+
+                    val currentCount = items[adapterPosition].takenCount
                     val clickedCount = index + 1
 
-                    items[position].takenCount =
+                    items[adapterPosition].takenCount =
                         if (currentCount == clickedCount) {
                             clickedCount - 1
                         } else {
                             clickedCount
                         }
 
-                    notifyItemChanged(position)
+                    notifyItemChanged(adapterPosition)
                 }
 
                 binding.capsuleContainerLayout.addView(capsuleBinding.root)

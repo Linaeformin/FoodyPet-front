@@ -4,6 +4,7 @@ import com.example.foodypet.data.auth.LoginRequest
 import com.example.foodypet.data.auth.RefreshTokenRequest
 import com.example.foodypet.data.auth.TokenResponse
 import com.example.foodypet.data.remote.dto.BasicResponse
+import com.example.foodypet.home.dto.CapsuleIntakeCreateRequest
 import com.example.foodypet.home.dto.CapsuleIntakeResponse
 import com.example.foodypet.home.dto.DietAnalysisResponse
 import com.example.foodypet.home.dto.DietRecommendRequest
@@ -96,4 +97,10 @@ interface ApiService {
         @Part("request") request: RequestBody,
         @Part image: MultipartBody.Part
     ): Response<Unit>
+
+    @POST("api/pets/{petId}/capsule-intakes")
+    suspend fun createCapsuleIntakes(
+        @Path("petId") petId: Long,
+        @Body request: CapsuleIntakeCreateRequest
+    ): Response<CommonResponse>
 }

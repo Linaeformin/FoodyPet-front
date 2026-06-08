@@ -22,6 +22,8 @@ import com.example.foodypet.home.model.PetPagerItem
 import com.example.foodypet.network.RetrofitClient
 import com.example.foodypet.stock.fragment.StockFragment
 import kotlinx.coroutines.launch
+import com.example.foodypet.home.dto.CapsuleIntakeCreateItem
+import com.example.foodypet.home.dto.CapsuleIntakeCreateRequest
 
 class HomeFragment : Fragment() {
 
@@ -468,40 +470,157 @@ class HomeFragment : Fragment() {
 
     private fun popupMedicine() {
         binding.homeFoodDiaryMedicineCv.setOnClickListener {
-            val medicineList = arrayListOf(
-                NutritionUiModel(
-                    nutritionId = 1L,
-                    nutritionName = "유산균",
-                    requiredCount = 3,
-                    takenCount = 2
-                ),
-                NutritionUiModel(
-                    nutritionId = 2L,
-                    nutritionName = "오메가3",
-                    requiredCount = 2,
-                    takenCount = 1
-                ),
-                NutritionUiModel(
-                    nutritionId = 3L,
-                    nutritionName = "비타민D",
-                    requiredCount = 1,
-                    takenCount = 0
-                )
-            )
+            if (petList.isEmpty()) {
+                Toast.makeText(
+                    requireContext(),
+                    "등록된 반려동물이 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
 
-            val dialog = NutritionDialogFragment(
-                nutritionList = medicineList,
-                onSaveClick = { updatedList ->
-                    updatedList.forEach {
-                        println("nutritionId=${it.nutritionId}, takenCount=${it.takenCount}")
+            if (currentPetPosition !in petList.indices) {
+                Toast.makeText(
+                    requireContext(),
+                    "반려동물 정보를 확인할 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            val currentPet = petList[currentPetPosition]
+
+            loadCapsuleIntakesAndShowDialog(
+                petId = currentPet.petId
+            )
+        }
+    }
+
+    private fun loadCapsuleIntakesAndShowDialog(petId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getCapsuleIntakes(petId)
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body == null) {
+                        Toast.makeText(
+                            requireContext(),
+                            "영양제 정보를 불러올 수 없습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@launch
                     }
 
-                    // 여기서 서버 저장 API 호출
-                    // ex) viewModel.saveMedicine(updatedList)
-                }
-            )
+                    val nutritionList = body.capsules.map { capsule ->
+                        NutritionUiModel(
+                            nutritionId = capsule.petCapsuleId,
+                            nutritionName = capsule.capsuleName,
+                            requiredCount = capsule.capsuleCount,
+                            takenCount = capsule.givenCount
+                        )
+                    }.toCollection(ArrayList())
 
-            dialog.show(parentFragmentManager, "MedicineDialog")
+                    if (nutritionList.isEmpty()) {
+                        Toast.makeText(
+                            requireContext(),
+                            "등록된 영양제가 없습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@launch
+                    }
+
+                    val dialog = NutritionDialogFragment(
+                        nutritionList = nutritionList,
+                        onSaveClick = { updatedList ->
+                            saveCapsuleIntakes(
+                                petId = petId,
+                                updatedList = updatedList
+                            )
+                        }
+                    )
+
+                    dialog.show(parentFragmentManager, "MedicineDialog")
+
+                } else {
+                    Log.e(
+                        "HomeFragment",
+                        "영양제 목록 조회 실패 code=${response.code()}, error=${response.errorBody()?.string()}"
+                    )
+
+                    Toast.makeText(
+                        requireContext(),
+                        "영양제 정보를 불러올 수 없습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "영양제 목록 조회 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "서버 연결 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun saveCapsuleIntakes(
+        petId: Long,
+        updatedList: List<NutritionUiModel>
+    ) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val request = CapsuleIntakeCreateRequest(
+                    capsuleIntakes = updatedList.map { item ->
+                        CapsuleIntakeCreateItem(
+                            petCapsuleId = item.nutritionId,
+                            givenCount = item.takenCount
+                        )
+                    }
+                )
+
+                val response = RetrofitClient.apiService.createCapsuleIntakes(
+                    petId = petId,
+                    request = request
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    Toast.makeText(
+                        requireContext(),
+                        body?.message ?: "성공적으로 처리되었습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    loadTodayDiaries()
+
+                } else {
+                    Log.e(
+                        "HomeFragment",
+                        "영양제 기록 저장 실패 code=${response.code()}, error=${response.errorBody()?.string()}"
+                    )
+
+                    Toast.makeText(
+                        requireContext(),
+                        "영양제 기록 저장에 실패했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "영양제 기록 저장 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "서버 연결 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
