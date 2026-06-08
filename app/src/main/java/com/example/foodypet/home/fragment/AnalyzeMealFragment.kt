@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,23 +12,50 @@ import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentAnalyzeMealBinding
+import com.example.foodypet.home.dto.DietAnalysisResponse
+import com.example.foodypet.home.dto.ErrorResponse
+import com.example.foodypet.home.dto.NutrientBarResponse
+import com.example.foodypet.network.RetrofitClient
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import androidx.core.content.res.ResourcesCompat
-import android.util.TypedValue
+import com.google.gson.Gson
+import kotlinx.coroutines.launch
 
 class AnalyzeMealFragment : Fragment() {
 
     private var _binding: FragmentAnalyzeMealBinding? = null
-    private lateinit var currentMealAnalysis: MealAnalysisUiModel
     private val binding get() = _binding!!
+
+    private lateinit var currentMealAnalysis: MealAnalysisUiModel
+
+    private var dietId: Long = -1L
+
+    companion object {
+        private const val ARG_DIET_ID = "dietId"
+
+        fun newInstance(dietId: Long): AnalyzeMealFragment {
+            return AnalyzeMealFragment().apply {
+                arguments = Bundle().apply {
+                    putLong(ARG_DIET_ID, dietId)
+                }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        dietId = arguments?.getLong(ARG_DIET_ID, -1L) ?: -1L
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,10 +71,7 @@ class AnalyzeMealFragment : Fragment() {
 
         initPieChart(binding.mealPieChartPc)
         initClickListeners()
-
-        val mockResponse = getMockMealAnalysis()
-        currentMealAnalysis = mockResponse
-        renderMealAnalysis(mockResponse)
+        requestDietAnalysis()
     }
 
     private fun initClickListeners() {
@@ -54,13 +79,12 @@ class AnalyzeMealFragment : Fragment() {
             showDetailSection()
         }
 
-        // 카드 전체 눌러도 열리게 하고 싶으면 이거도 유지
         binding.mealMoreCardCv.setOnClickListener {
             showDetailSection()
         }
 
         binding.mealSubmitBtn.setOnClickListener {
-            // TODO 최종 등록 API 호출
+            confirmDiet()
         }
 
         binding.mealBackIv.setOnClickListener {
@@ -68,19 +92,159 @@ class AnalyzeMealFragment : Fragment() {
         }
     }
 
+    private fun confirmDiet() {
+        if (dietId == -1L) {
+            Toast.makeText(requireContext(), "등록할 식단 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.confirmDiet(dietId)
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    Toast.makeText(
+                        requireContext(),
+                        body?.message ?: "식단이 최종 등록되었습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, HomeFragment())
+                        .commit()
+                } else {
+                    val errorMessage = parseErrorMessage(
+                        response.errorBody()?.string(),
+                        "식단 최종 등록에 실패했습니다."
+                    )
+
+                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "식단 최종 등록 요청 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun requestDietAnalysis() {
+        if (dietId == -1L) {
+            Toast.makeText(requireContext(), "분석할 식단 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            parentFragmentManager.popBackStack()
+            return
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getDietAnalysis(dietId)
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body != null) {
+                        currentMealAnalysis = body.toMealAnalysisUiModel()
+                        renderMealAnalysis(currentMealAnalysis)
+                    } else {
+                        Toast.makeText(requireContext(), "식단 분석 결과가 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    val errorMessage = parseErrorMessage(
+                        response.errorBody()?.string(),
+                        "식단 분석에 실패했습니다."
+                    )
+                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "식단 분석 요청 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun DietAnalysisResponse.toMealAnalysisUiModel(): MealAnalysisUiModel {
+        val calorieBar = nutrientBars.findByName("칼로리")
+        val proteinBar = nutrientBars.findByName("단백질")
+        val fatBar = nutrientBars.findByName("지방")
+        val ashBar = nutrientBars.findByName("조회분")
+        val fiberBar = nutrientBars.findByName("조섬유")
+
+        return MealAnalysisUiModel(
+            title = title,
+            chartItems = nutrientRatios.map {
+                NutrientChartItem(
+                    name = it.name,
+                    percent = it.value,
+                    colorHex = getNutrientColor(it.name)
+                )
+            },
+            calorie = calorieBar.toNutrientBarItem("칼로리"),
+            protein = proteinBar.toNutrientBarItem("단백질"),
+            fat = fatBar.toNutrientBarItem("지방"),
+            carbohydrate = ashBar.toNutrientBarItem("조회분"),
+            fiber = fiberBar.toNutrientBarItem("조섬유"),
+            extraInfo = ExtraInfo(
+                ratioTitle = "칼슘 : 인",
+                ratioValue = calciumPhosphorus.displayRatio,
+                ratioStatus = calciumPhosphorus.status.toStatusType(),
+                taurineTitle = "타우린",
+                taurineValue = taurine.displayValue,
+                taurineStatus = taurine.status.toStatusType()
+            )
+        )
+    }
+
+    private fun List<NutrientBarResponse>.findByName(name: String): NutrientBarResponse? {
+        return firstOrNull { it.name == name }
+    }
+
+    private fun NutrientBarResponse?.toNutrientBarItem(defaultLabel: String): NutrientBarItem {
+        return NutrientBarItem(
+            label = this?.name ?: defaultLabel,
+            valueText = this?.displayValue ?: "-",
+            progressPercent = this?.percent?.toInt() ?: 0,
+            status = this?.status?.toStatusType() ?: StatusType.GOOD
+        )
+    }
+
+    private fun String.toStatusType(): StatusType {
+        return when (uppercase()) {
+            "GOOD" -> StatusType.GOOD
+            "LACK" -> StatusType.LACK
+            "EXCESS" -> StatusType.EXCESS
+            else -> StatusType.GOOD
+        }
+    }
+
+    private fun getNutrientColor(name: String): String {
+        return when (name) {
+            "단백질" -> "#FF1A1A"
+            "수분" -> "#FF1493"
+            "지방" -> "#FF9800"
+            "조회분" -> "#FFD400"
+            "조섬유" -> "#66CC00"
+            "칼슘" -> "#00B8D4"
+            "인" -> "#3D5AFE"
+            "타우린" -> "#8A2BE2"
+            "기타" -> "#A9A9A9"
+            else -> "#A9A9A9"
+        }
+    }
+
     private fun showDetailSection() {
         binding.mealMoreCardCv.visibility = View.GONE
         binding.mealDetailContainerLl.visibility = View.VISIBLE
 
-        binding.mealDetailContainerLl.post {
-            bindBarSection(
-                labelView = binding.mealFiberLabelTv,
-                valueView = binding.mealFiberValueTv,
-                statusView = binding.mealFiberStatusTv,
-                statusIconView = binding.mealFiberStatusIv,
-                fillView = binding.mealFiberFillV,
-                item = currentMealAnalysis.fiber
-            )
+        if (::currentMealAnalysis.isInitialized) {
+            binding.mealDetailContainerLl.post {
+                bindBarSection(
+                    labelView = binding.mealFiberLabelTv,
+                    valueView = binding.mealFiberValueTv,
+                    statusView = binding.mealFiberStatusTv,
+                    statusIconView = binding.mealFiberStatusIv,
+                    fillView = binding.mealFiberFillV,
+                    item = currentMealAnalysis.fiber
+                )
+            }
         }
     }
 
@@ -170,8 +334,13 @@ class AnalyzeMealFragment : Fragment() {
     }
 
     private fun renderPieChart(items: List<NutrientChartItem>) {
-        val entries = items.map { PieEntry(it.percent.toFloat(), it.name) }
-        val colors = items.map { Color.parseColor(it.colorHex) }
+        val entries = items.map {
+            PieEntry(it.percent.toFloat(), it.name)
+        }
+
+        val colors = items.map {
+            Color.parseColor(it.colorHex)
+        }
 
         val dataSet = PieDataSet(entries, "").apply {
             this.colors = colors
@@ -188,9 +357,6 @@ class AnalyzeMealFragment : Fragment() {
         binding.mealPieChartPc.animateY(700, Easing.EaseInOutQuad)
     }
 
-    /**
-     * 오른쪽 범례는 서버 데이터 기준으로 동적 생성
-     */
     private fun renderLegendItems(items: List<NutrientChartItem>) {
         binding.mealNutrientLegendGl.removeAllViews()
 
@@ -208,7 +374,7 @@ class AnalyzeMealFragment : Fragment() {
             layoutParams = GridLayout.LayoutParams().apply {
                 width = 0
                 columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                setMargins(0, 4.dp, 8.dp, 4.dp)   // 16dp -> 8dp로 줄임
+                setMargins(0, 4.dp, 8.dp, 4.dp)
             }
         }
 
@@ -270,73 +436,33 @@ class AnalyzeMealFragment : Fragment() {
     private fun getStatusColor(status: StatusType): Int {
         return when (status) {
             StatusType.GOOD -> Color.parseColor("#57B600")
-            StatusType.LOW -> Color.parseColor("#E53935")
-            StatusType.HIGH -> Color.parseColor("#E53935")
+            StatusType.LACK -> Color.parseColor("#E53935")
+            StatusType.EXCESS -> Color.parseColor("#E53935")
         }
     }
 
-    private fun formatPercent(value: Number): String {
-        val doubleValue = value.toDouble()
-        return if (doubleValue % 1.0 == 0.0) {
-            doubleValue.toInt().toString()
+    private fun formatPercent(value: Double): String {
+        return if (value % 1.0 == 0.0) {
+            value.toInt().toString()
         } else {
-            String.format("%.1f", doubleValue)
+            String.format("%.1f", value)
         }
     }
 
-    private fun getMockMealAnalysis(): MealAnalysisUiModel {
-        return MealAnalysisUiModel(
-            title = "랑이의 1회 식단 분석",
-            chartItems = listOf(
-                NutrientChartItem("단백질", 26, "#FF1A1A"),
-                NutrientChartItem("수분", 10, "#FF1493"),
-                NutrientChartItem("지방", 9, "#FF9800"),
-                NutrientChartItem("조회분", 8, "#FFD400"),
-                NutrientChartItem("조섬유", 5, "#66CC00"),
-                NutrientChartItem("칼슘", 0.6, "#00B8D4"),
-                NutrientChartItem("인", 0.5, "#3D5AFE"),
-                NutrientChartItem("타우린", 0.1, "#8A2BE2"),
-                NutrientChartItem("기타", 40.8, "#A9A9A9")
-            ),
-            calorie = NutrientBarItem(
-                label = "칼로리",
-                valueText = "220kcal",
-                progressPercent = 95,
-                status = StatusType.GOOD
-            ),
-            protein = NutrientBarItem(
-                label = "단백질",
-                valueText = "26%",
-                progressPercent = 92,
-                status = StatusType.GOOD
-            ),
-            fat = NutrientBarItem(
-                label = "지방",
-                valueText = "9%",
-                progressPercent = 88,
-                status = StatusType.GOOD
-            ),
-            carbohydrate = NutrientBarItem(
-                label = "조회분",
-                valueText = "8%",
-                progressPercent = 35,
-                status = StatusType.LOW
-            ),
-            fiber = NutrientBarItem(
-                label = "조섬유",
-                valueText = "5%",
-                progressPercent = 78,
-                status = StatusType.GOOD
-            ),
-            extraInfo = ExtraInfo(
-                ratioTitle = "칼슘 : 인",
-                ratioValue = "1.2 : 1",
-                ratioStatus = StatusType.GOOD,
-                taurineTitle = "타우린",
-                taurineValue = "25mg",
-                taurineStatus = StatusType.GOOD
-            )
-        )
+    private fun parseErrorMessage(
+        errorBody: String?,
+        defaultMessage: String
+    ): String {
+        if (errorBody.isNullOrBlank()) {
+            return defaultMessage
+        }
+
+        return try {
+            Gson().fromJson(errorBody, ErrorResponse::class.java).message
+                ?: defaultMessage
+        } catch (e: Exception) {
+            defaultMessage
+        }
     }
 
     override fun onDestroyView() {
@@ -358,7 +484,7 @@ data class MealAnalysisUiModel(
 
 data class NutrientChartItem(
     val name: String,
-    val percent: Number,
+    val percent: Double,
     val colorHex: String
 )
 
@@ -380,8 +506,8 @@ data class ExtraInfo(
 
 enum class StatusType(val text: String) {
     GOOD("양호"),
-    LOW("부족"),
-    HIGH("높음")
+    LACK("부족"),
+    EXCESS("많음")
 }
 
 val Int.dp: Int

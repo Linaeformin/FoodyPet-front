@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
@@ -23,12 +24,20 @@ object RetrofitClient {
 
     private val basicClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            .connectTimeout(180, TimeUnit.SECONDS)
+            .readTimeout(180, TimeUnit.SECONDS)
+            .writeTimeout(180, TimeUnit.SECONDS)
+            .callTimeout(180, TimeUnit.SECONDS)
             .addInterceptor(loggingInterceptor)
             .build()
     }
 
     private val authClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            .connectTimeout(180, TimeUnit.SECONDS)
+            .readTimeout(180, TimeUnit.SECONDS)
+            .writeTimeout(180, TimeUnit.SECONDS)
+            .callTimeout(180, TimeUnit.SECONDS)
             .addInterceptor(loggingInterceptor)
             .addInterceptor(AuthInterceptor(tokenManager))
             .authenticator(TokenAuthenticator(tokenManager))

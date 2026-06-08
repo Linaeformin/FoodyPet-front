@@ -4,6 +4,9 @@ import com.example.foodypet.data.auth.LoginRequest
 import com.example.foodypet.data.auth.RefreshTokenRequest
 import com.example.foodypet.data.auth.TokenResponse
 import com.example.foodypet.data.remote.dto.BasicResponse
+import com.example.foodypet.home.dto.DietAnalysisResponse
+import com.example.foodypet.home.dto.DietRecommendRequest
+import com.example.foodypet.home.dto.DietRecommendResponse
 import com.example.foodypet.home.dto.HomeTodayResponse
 import com.example.foodypet.stock.dto.AssignFoodStockRequest
 import com.example.foodypet.stock.dto.CommonResponse
@@ -18,6 +21,7 @@ import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -57,4 +61,18 @@ interface ApiService {
         @Query("sort") sort: PetFoodStockSortType
     ): Response<StockResponse>
 
+    @POST("api/diets/recommend")
+    suspend fun recommendDiet(
+        @Body request: DietRecommendRequest
+    ): Response<DietRecommendResponse>
+
+    @GET("api/diets/recommend/{dietId}")
+    suspend fun getDietAnalysis(
+        @Path("dietId") dietId: Long
+    ): Response<DietAnalysisResponse>
+
+    @POST("api/diets/recommend/{dietId}")
+    suspend fun confirmDiet(
+        @Path("dietId") dietId: Long
+    ): Response<CommonResponse>
 }

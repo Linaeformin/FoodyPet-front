@@ -1,6 +1,7 @@
 package com.example.foodypet.home.model
 
 data class PetPagerItem(
+    val petId: Long,
     val name: String,
     val imgUrl: String?,
 

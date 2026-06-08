@@ -126,6 +126,7 @@ class HomeFragment : Fragment() {
 
     private fun HomePetTodayResponse.toPetPagerItem(): PetPagerItem {
         return PetPagerItem(
+            petId = petId,
             name = petName,
             imgUrl = petImg,
             mealTime = todayMeal.mealTime?.take(5),
@@ -340,7 +341,10 @@ class HomeFragment : Fragment() {
 
             if (isMealEmpty) {
                 parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, MealRecommendFragment())
+                    .replace(
+                        R.id.fragment_container,
+                        MealRecommendFragment.newInstance(currentPet.petId)
+                    )
                     .addToBackStack(null)
                     .commit()
             }

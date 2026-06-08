@@ -4,12 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.foodypet.home.adapter.MealAdapter
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentMealRecommendBinding
+import com.example.foodypet.home.adapter.MealAdapter
+import com.example.foodypet.home.dto.DietAnalysisResponse
+import com.example.foodypet.home.dto.DietRecommendRequest
+import com.example.foodypet.home.dto.DietRecommendResponse
+import com.example.foodypet.home.dto.ErrorResponse
+import com.example.foodypet.home.dto.NutrientBarResponse
+import com.example.foodypet.home.dto.RecommendMealDto
 import com.example.foodypet.home.model.MealItem
+import com.example.foodypet.network.RetrofitClient
+import com.google.gson.Gson
+import kotlinx.coroutines.launch
 
 class MealRecommendFragment : Fragment() {
 
@@ -19,6 +30,27 @@ class MealRecommendFragment : Fragment() {
     private lateinit var mealAdapter: MealAdapter
 
     private var isTimeToggleOn = true
+
+    private var petId: Long = -1L
+    private var recommendResponse: DietRecommendResponse? = null
+    private var recommendMeals: List<RecommendMealDto> = emptyList()
+
+    companion object {
+        private const val ARG_PET_ID = "petId"
+
+        fun newInstance(petId: Long): MealRecommendFragment {
+            return MealRecommendFragment().apply {
+                arguments = Bundle().apply {
+                    putLong(ARG_PET_ID, petId)
+                }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        petId = arguments?.getLong(ARG_PET_ID, -1L) ?: -1L
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +67,7 @@ class MealRecommendFragment : Fragment() {
         initAdapter()
         initView()
         initClickListener()
-        loadDummyData()
+        requestRecommendDiet()
     }
 
     private fun initAdapter() {
@@ -52,13 +84,11 @@ class MealRecommendFragment : Fragment() {
     private fun initView() {
         binding.mealTitleTv.text = "식단 추천 받기"
         binding.mealReflectTitleTv.text = "반영 항목"
-        binding.mealRecommendTitleTv.text = "랑이의 추천 식단"
 
         binding.mealGenderTv.text = "성별"
         binding.mealWeightTv.text = "종"
         binding.mealNeuteredTv.text = "중성화"
         binding.mealAgeTv.text = "나이"
-        binding.mealFeedCountTv.text = "하루 6회 급여"
 
         updateTimeToggleUi()
     }
@@ -71,7 +101,155 @@ class MealRecommendFragment : Fragment() {
         binding.timeToggleLayout.setOnClickListener {
             isTimeToggleOn = !isTimeToggleOn
             updateTimeToggleUi()
-            loadDummyData()
+            renderRecommendMeals()
+        }
+
+        binding.btnAnalyze.setOnClickListener {
+            requestDietAnalysis()
+        }
+    }
+
+    private fun requestRecommendDiet() {
+        if (petId == -1L) {
+            Toast.makeText(requireContext(), "반려동물 정보가 올바르지 않습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.recommendDiet(
+                    DietRecommendRequest(
+                        petId = petId
+                    )
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body != null) {
+                        recommendResponse = body
+                        recommendMeals = body.meals
+
+                        binding.mealRecommendTitleTv.text = "${body.petName}의 추천 식단"
+                        binding.mealFeedCountTv.text = "하루 ${body.meals.size}회 급여"
+
+                        renderRecommendMeals()
+                    } else {
+                        Toast.makeText(requireContext(), "식단 추천 결과가 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    val errorMessage = parseErrorMessage(
+                        errorBody = response.errorBody()?.string(),
+                        defaultMessage = "식단 추천에 실패했습니다."
+                    )
+                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "식단 추천 요청 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun requestDietAnalysis() {
+        val dietId = recommendResponse?.dailyDietId
+
+        if (dietId == null) {
+            Toast.makeText(requireContext(), "분석할 식단 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        parentFragmentManager.beginTransaction()
+            .replace(
+                R.id.fragment_container,
+                AnalyzeMealFragment.newInstance(dietId)
+            )
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun renderRecommendMeals() {
+        val mealItems = recommendMeals.map { meal ->
+            MealItem(
+                mealId = meal.mealOrder.toLong(),
+                time = if (isTimeToggleOn) {
+                    meal.mealTime
+                } else {
+                    "${meal.mealOrder}회"
+                },
+                content = meal.description,
+                isFed = false
+            )
+        }
+
+        mealAdapter.submitList(mealItems)
+    }
+
+    private fun DietAnalysisResponse.toMealAnalysisUiModel(): MealAnalysisUiModel {
+        val calorieBar = nutrientBars.findByName("칼로리")
+        val proteinBar = nutrientBars.findByName("단백질")
+        val fatBar = nutrientBars.findByName("지방")
+        val ashBar = nutrientBars.findByName("조회분")
+        val fiberBar = nutrientBars.findByName("조섬유")
+
+        return MealAnalysisUiModel(
+            title = title,
+            chartItems = nutrientRatios.map {
+                NutrientChartItem(
+                    name = it.name,
+                    percent = it.value,
+                    colorHex = getNutrientColor(it.name)
+                )
+            },
+            calorie = calorieBar.toNutrientBarItem("칼로리"),
+            protein = proteinBar.toNutrientBarItem("단백질"),
+            fat = fatBar.toNutrientBarItem("지방"),
+            carbohydrate = ashBar.toNutrientBarItem("조회분"),
+            fiber = fiberBar.toNutrientBarItem("조섬유"),
+            extraInfo = ExtraInfo(
+                ratioTitle = "칼슘 : 인",
+                ratioValue = calciumPhosphorus.displayRatio,
+                ratioStatus = calciumPhosphorus.status.toStatusType(),
+                taurineTitle = "타우린",
+                taurineValue = taurine.displayValue,
+                taurineStatus = taurine.status.toStatusType()
+            )
+        )
+    }
+
+    private fun List<NutrientBarResponse>.findByName(name: String): NutrientBarResponse? {
+        return firstOrNull { it.name == name }
+    }
+
+    private fun NutrientBarResponse?.toNutrientBarItem(defaultLabel: String): NutrientBarItem {
+        return NutrientBarItem(
+            label = this?.name ?: defaultLabel,
+            valueText = this?.displayValue ?: "-",
+            progressPercent = this?.percent?.toInt() ?: 0,
+            status = this?.status?.toStatusType() ?: StatusType.GOOD
+        )
+    }
+
+    private fun String.toStatusType(): StatusType {
+        return when (uppercase()) {
+            "GOOD" -> StatusType.GOOD
+            "LACK" -> StatusType.LACK
+            "EXCESS" -> StatusType.EXCESS
+            else -> StatusType.GOOD
+        }
+    }
+
+    private fun getNutrientColor(name: String): String {
+        return when (name) {
+            "단백질" -> "#FF1A1A"
+            "수분" -> "#FF1493"
+            "지방" -> "#FF9800"
+            "조회분" -> "#FFD400"
+            "조섬유" -> "#66CC00"
+            "칼슘" -> "#00B8D4"
+            "인" -> "#3D5AFE"
+            "타우린" -> "#8A2BE2"
+            "기타" -> "#A9A9A9"
+            else -> "#A9A9A9"
         }
     }
 
@@ -83,88 +261,20 @@ class MealRecommendFragment : Fragment() {
         }
     }
 
-    private fun loadDummyData() {
-        val dummyList = if (isTimeToggleOn) {
-            listOf(
-                MealItem(
-                    mealId = 1L,
-                    time = "13:00",
-                    content = "흑돼지 치즈볼 1개, 닭오돌뼈 10g, 플라그오프, 어거스틴 슈퍼부스트, 뉴로액트, 도란도란 단호박",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 2L,
-                    time = "15:00",
-                    content = "닭가슴살볼 2개, 북어트릿 5g, 오메가3, 유산균, 브로콜리 소량",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 3L,
-                    time = "17:00",
-                    content = "연어 큐브 20g, 고구마 30g, 플라그오프, 뉴로액트",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 4L,
-                    time = "19:00",
-                    content = "오리안심 15g, 단호박 20g, 슈퍼부스트, 유산균",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 5L,
-                    time = "21:00",
-                    content = "소고기 패티 1개, 파프리카 소량, 오메가3, 도란도란 단호박",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 6L,
-                    time = "23:00",
-                    content = "흰살생선 트릿 2개, 블루베리 소량, 플라그오프, 유산균",
-                    isFed = false
-                )
-            )
-        } else {
-            listOf(
-                MealItem(
-                    mealId = 1L,
-                    time = "1회",
-                    content = "흑돼지 치즈볼 1개, 닭오돌뼈 10g, 플라그오프, 어거스틴 슈퍼부스트, 뉴로액트, 도란도란 단호박",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 2L,
-                    time = "2회",
-                    content = "닭가슴살볼 2개, 북어트릿 5g, 오메가3, 유산균, 브로콜리 소량",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 3L,
-                    time = "3회",
-                    content = "연어 큐브 20g, 고구마 30g, 플라그오프, 뉴로액트",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 4L,
-                    time = "4회",
-                    content = "오리안심 15g, 단호박 20g, 슈퍼부스트, 유산균",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 5L,
-                    time = "5회",
-                    content = "소고기 패티 1개, 파프리카 소량, 오메가3, 도란도란 단호박",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 6L,
-                    time = "6회",
-                    content = "흰살생선 트릿 2개, 블루베리 소량, 플라그오프, 유산균",
-                    isFed = false
-                )
-            )
+    private fun parseErrorMessage(
+        errorBody: String?,
+        defaultMessage: String
+    ): String {
+        if (errorBody.isNullOrBlank()) {
+            return defaultMessage
         }
 
-        mealAdapter.submitList(dummyList)
+        return try {
+            Gson().fromJson(errorBody, ErrorResponse::class.java).message
+                ?: defaultMessage
+        } catch (e: Exception) {
+            defaultMessage
+        }
     }
 
     override fun onDestroyView() {
