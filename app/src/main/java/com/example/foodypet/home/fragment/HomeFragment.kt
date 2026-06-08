@@ -1,33 +1,42 @@
 package com.example.foodypet.home.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentHomeBinding
 import com.example.foodypet.home.adapter.HomePetPagerAdapter
+import com.example.foodypet.home.dto.HomePetTodayResponse
 import com.example.foodypet.home.enum.DiaryMode
 import com.example.foodypet.home.model.NutritionUiModel
 import com.example.foodypet.home.model.PetPagerItem
+import com.example.foodypet.network.RetrofitClient
 import com.example.foodypet.stock.fragment.StockFragment
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var petList: List<PetPagerItem>
+    private var petList: List<PetPagerItem> = emptyList()
     private var currentPetPosition = 0
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
+
+            if (position !in petList.indices) return
+
             currentPetPosition = position
             setCurrentIndicator(position)
             updateCurrentPetUI(petList[position])
@@ -50,39 +59,49 @@ class HomeFragment : Fragment() {
             currentPetPosition = it.getInt(KEY_CURRENT_PET_POSITION, currentPetPosition)
         }
 
-        petList = listOf(
-            PetPagerItem(
-                name = "랑이",
-                img = R.drawable.cat_1,
-                mealTime = "13:00",
-                mealContent = "흑돼지 치즈볼 1개, 닭오돌뼈 10g",
-                medicineText = "2정 / 6정",
-                waterText = "1500 / 2000ml",
-                snackText = "1회",
-                diaryMealText = "2회 / 5회 급여"
-            ),
-            PetPagerItem(
-                name = "콩이",
-                img = R.drawable.dog_1,
-                mealTime = "09:30",
-                mealContent = "연어 사료 80g, 유산균 1포",
-                medicineText = "1정 / 3정",
-                waterText = "900 / 1500ml",
-                snackText = "2회",
-                diaryMealText = "1회 / 3회 급여"
-            ),
-            PetPagerItem(
-                name = "보리",
-                img = R.drawable.dog_2,
-                mealTime = null,
-                mealContent = null,
-                medicineText = "0정 / 2정",
-                waterText = "700 / 1200ml",
-                snackText = "1회",
-                diaryMealText = "0회 / 2회 급여"
-            )
-        )
+        moveMealAllFragment()
+        moveRecommendFragment()
+        moveNotification()
+        moveDiary()
+        moveDiaryList()
+        popupSnack()
+        popupWater()
+        popupMedicine()
+        moveStock()
 
+        loadTodayDiaries()
+    }
+
+    private fun loadTodayDiaries() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getTodayDiaries()
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body != null) {
+                        petList = body.pets.map { pet ->
+                            pet.toPetPagerItem()
+                        }
+
+                        updateHomeWithPetList()
+                    } else {
+                        showHomeLoadFail()
+                    }
+                } else {
+                    Log.e("HomeFragment", "오늘 기록 조회 실패 code: ${response.code()}")
+                    showHomeLoadFail()
+                }
+
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "오늘 기록 조회 오류", e)
+                showHomeLoadFail()
+            }
+        }
+    }
+
+    private fun updateHomeWithPetList() {
         val isPetRegistered = petList.isNotEmpty()
 
         updatePetLockUI(isPetRegistered)
@@ -103,16 +122,39 @@ class HomeFragment : Fragment() {
             clearMealText()
             clearFoodDiary()
         }
+    }
 
-        moveMealAllFragment()
-        moveRecommendFragment()
-        moveNotification()
-        moveDiary()
-        moveDiaryList()
-        popupSnack()
-        popupWater()
-        popupMedicine()
-        moveStock()
+    private fun HomePetTodayResponse.toPetPagerItem(): PetPagerItem {
+        return PetPagerItem(
+            name = petName,
+            imgUrl = petImg,
+            mealTime = todayMeal.mealTime?.take(5),
+            mealContent = todayMeal.mealText.takeIf {
+                todayMeal.exists && it.isNotBlank()
+            },
+            medicineText = "${diary.capsuleDiary.givenCount}회 / ${diary.capsuleDiary.targetCount}회",
+            waterText = diary.waterDiary.displayText,
+            snackText = diary.treatDiary.displayText,
+            diaryMealText = diary.mealDiary.displayText
+        )
+    }
+
+    private fun showHomeLoadFail() {
+        if (!isAdded) return
+
+        Toast.makeText(
+            requireContext(),
+            "홈 정보를 불러올 수 없습니다.",
+            Toast.LENGTH_SHORT
+        ).show()
+
+        petList = emptyList()
+        updatePetLockUI(false)
+        updatePetSection(emptyList())
+        updatePetName(null)
+        updateMealRegisteredUI(false)
+        clearMealText()
+        clearFoodDiary()
     }
 
     private fun updatePetLockUI(isPetRegistered: Boolean) {
@@ -285,26 +327,12 @@ class HomeFragment : Fragment() {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt(KEY_CURRENT_PET_POSITION, currentPetPosition)
-    }
-
-    override fun onDestroyView() {
-        binding.homePetViewPager.unregisterOnPageChangeCallback(pageChangeCallback)
-        _binding = null
-        super.onDestroyView()
-    }
-
-    companion object {
-        private const val KEY_CURRENT_PET_POSITION = "current_pet_position"
-    }
-
     private fun showDietRegisterDialog() {
         val dialog = DietRegisterDialogFragment()
 
         dialog.setOnRecommendClickListener {
             if (petList.isEmpty()) return@setOnRecommendClickListener
+            if (currentPetPosition !in petList.indices) return@setOnRecommendClickListener
 
             val currentPet = petList[currentPetPosition]
             val isMealEmpty =
@@ -320,6 +348,7 @@ class HomeFragment : Fragment() {
 
         dialog.setOnDirectClickListener {
             if (petList.isEmpty()) return@setOnDirectClickListener
+            if (currentPetPosition !in petList.indices) return@setOnDirectClickListener
 
             val currentPet = petList[currentPetPosition]
             val isMealEmpty =
@@ -327,7 +356,10 @@ class HomeFragment : Fragment() {
 
             if (isMealEmpty) {
                 parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, MealEditorFragment.newInstance(MealEditorMode.CREATE))
+                    .replace(
+                        R.id.fragment_container,
+                        MealEditorFragment.newInstance(MealEditorMode.CREATE)
+                    )
                     .addToBackStack(null)
                     .commit()
             }
@@ -383,7 +415,6 @@ class HomeFragment : Fragment() {
         binding.homeFoodDiaryWaterCv.setOnClickListener {
             val dialog = WaterAmountDialog(requireContext()) { totalAmount, inputValues ->
 
-                // 합계 텍스트 반영
                 binding.homeFoodDiaryWaterTv.text = "${totalAmount}ml"
 
                 // TODO: 서버 저장이나 ViewModel 저장 필요하면 여기서 처리
@@ -433,4 +464,18 @@ class HomeFragment : Fragment() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_CURRENT_PET_POSITION, currentPetPosition)
+    }
+
+    override fun onDestroyView() {
+        binding.homePetViewPager.unregisterOnPageChangeCallback(pageChangeCallback)
+        _binding = null
+        super.onDestroyView()
+    }
+
+    companion object {
+        private const val KEY_CURRENT_PET_POSITION = "current_pet_position"
+    }
 }

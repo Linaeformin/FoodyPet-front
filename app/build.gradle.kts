@@ -59,5 +59,6 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }
 

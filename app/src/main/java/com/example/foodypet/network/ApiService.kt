@@ -4,9 +4,11 @@ import com.example.foodypet.data.auth.LoginRequest
 import com.example.foodypet.data.auth.RefreshTokenRequest
 import com.example.foodypet.data.auth.TokenResponse
 import com.example.foodypet.data.remote.dto.BasicResponse
+import com.example.foodypet.home.dto.HomeTodayResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -29,4 +31,9 @@ interface ApiService {
         @Part petAssignFormDto: MultipartBody.Part,
         @Part image: MultipartBody.Part
     ): Response<BasicResponse>
+
+    @GET("api/diaries/today")
+    suspend fun getTodayDiaries(): Response<HomeTodayResponse>
+
+
 }
