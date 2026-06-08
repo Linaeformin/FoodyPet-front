@@ -3,9 +3,13 @@ package com.example.foodypet.network
 import com.example.foodypet.data.auth.LoginRequest
 import com.example.foodypet.data.auth.RefreshTokenRequest
 import com.example.foodypet.data.auth.TokenResponse
+import com.example.foodypet.data.remote.dto.BasicResponse
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 
 interface ApiService {
 
@@ -18,4 +22,11 @@ interface ApiService {
     suspend fun refreshToken(
         @Body request: RefreshTokenRequest
     ): Response<TokenResponse>
+
+    @Multipart
+    @POST("api/pets")
+    suspend fun registerPet(
+        @Part petAssignFormDto: MultipartBody.Part,
+        @Part image: MultipartBody.Part
+    ): Response<BasicResponse>
 }

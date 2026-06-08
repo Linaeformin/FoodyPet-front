@@ -12,14 +12,19 @@ class PetRegisterPagerAdapter(
     private val mode: String
 ) : FragmentStateAdapter(fragment) {
 
+    val step1Fragment = PetRegisterStep1Fragment.newInstance(mode)
+    val step2Fragment = PetRegisterStep2Fragment.newInstance(mode)
+    val step3Fragment = PetRegisterStep3Fragment.newInstance(mode)
+    val step4Fragment = PetRegisterStep4Fragment.newInstance(mode)
+
     override fun getItemCount(): Int = 4
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
-            0 -> PetRegisterStep1Fragment.newInstance(mode)
-            1 -> PetRegisterStep2Fragment.newInstance(mode)
-            2 -> PetRegisterStep3Fragment.newInstance(mode)
-            3 -> PetRegisterStep4Fragment.newInstance(mode)
+            0 -> step1Fragment
+            1 -> step2Fragment
+            2 -> step3Fragment
+            3 -> step4Fragment
             else -> throw IllegalArgumentException("Invalid step position: $position")
         }
     }

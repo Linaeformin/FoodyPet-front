@@ -278,16 +278,16 @@
 
             <EditText
                 android:id="@+id/pet_register_meal_time_1_et"
-                android:layout_width="160dp"
+                android:layout_width="210dp"
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:fontFamily="@font/scdream_regular"
                 android:gravity="end|center_vertical"
-                android:hint="8:00"
+                android:hint="시각을 입력해주세요 (ex 08:00)"
                 android:inputType="time"
                 android:textColor="@color/black"
-                android:textColorHint="@color/black"
-                android:textSize="13sp" />
+                android:textColorHint="#B5B5B5"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <!-- 2회 -->
@@ -314,16 +314,16 @@
 
             <EditText
                 android:id="@+id/pet_register_meal_time_2_et"
-                android:layout_width="160dp"
+                android:layout_width="210dp"
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:fontFamily="@font/scdream_regular"
                 android:gravity="end|center_vertical"
-                android:hint="8:00"
+                android:hint="시각을 입력해주세요 (ex 13:00)"
                 android:inputType="time"
                 android:textColor="@color/black"
-                android:textColorHint="@color/black"
-                android:textSize="13sp" />
+                android:textColorHint="#B5B5B5"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <!-- 3회 -->

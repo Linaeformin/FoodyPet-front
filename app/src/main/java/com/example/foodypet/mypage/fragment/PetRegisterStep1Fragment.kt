@@ -123,6 +123,18 @@ class PetRegisterStep1Fragment : Fragment() {
         return selectedImageUri
     }
 
+    fun getPetWeightKg(): Double? {
+        return binding.petRegisterKgEt.text.toString()
+            .trim()
+            .toDoubleOrNull()
+    }
+
+    fun getFormattedBirthDate(): String {
+        return binding.petRegisterBirthEt.text.toString()
+            .trim()
+            .replace(".", "-")
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
