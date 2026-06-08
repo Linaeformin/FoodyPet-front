@@ -2,6 +2,7 @@ package com.example.foodypet.home.fragment
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodypet.R
@@ -16,6 +17,26 @@ class MealDiaryListFragment : Fragment(R.layout.fragment_meal_diary_list) {
     private val binding get() = _binding!!
 
     private lateinit var mealDiaryAdapter: MealDiaryAdapter
+
+    private var petId: Long = -1L
+
+    companion object {
+        private const val ARG_PET_ID = "arg_pet_id"
+
+        fun newInstance(petId: Long): MealDiaryListFragment {
+            return MealDiaryListFragment().apply {
+                arguments = Bundle().apply {
+                    putLong(ARG_PET_ID, petId)
+                }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        petId = arguments?.getLong(ARG_PET_ID, -1L) ?: -1L
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,8 +62,23 @@ class MealDiaryListFragment : Fragment(R.layout.fragment_meal_diary_list) {
     }
 
     private fun moveToDiaryFragment() {
+        if (petId == -1L) {
+            Toast.makeText(
+                requireContext(),
+                "반려동물 정보를 확인할 수 없습니다.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, DiaryFragment.newInstance(DiaryMode.READ))
+            .replace(
+                R.id.fragment_container,
+                DiaryFragment.newInstance(
+                    mode = DiaryMode.EDIT,
+                    petId = petId
+                )
+            )
             .addToBackStack(null)
             .commit()
     }
@@ -76,15 +112,14 @@ class MealDiaryListFragment : Fragment(R.layout.fragment_meal_diary_list) {
         )
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private fun back() {
         binding.mealBackIv.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

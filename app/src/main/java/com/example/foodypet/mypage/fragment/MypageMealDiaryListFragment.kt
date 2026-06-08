@@ -175,7 +175,10 @@ class MypageMealDiaryListFragment : Fragment() {
                 parentFragmentManager.beginTransaction()
                     .replace(
                         R.id.fragment_container,
-                        DiaryFragment.newInstance(DiaryMode.READ)
+                        DiaryFragment.newInstance(
+                            mode = DiaryMode.READ,
+                            petId = petId
+                        )
                     )
                     .addToBackStack(null)
                     .commit()

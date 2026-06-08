@@ -4,7 +4,9 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.text.InputFilter
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -19,19 +21,31 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentDiaryBinding
+import com.example.foodypet.home.dto.MealDiaryCapsuleRequest
+import com.example.foodypet.home.dto.MealDiaryCreateRequest
 import com.example.foodypet.home.enum.DiaryMode
 import com.example.foodypet.home.model.MealItem
+import com.example.foodypet.network.RetrofitClient
+import com.google.gson.Gson
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class DiaryFragment : Fragment(R.layout.fragment_diary) {
 
     private var _binding: FragmentDiaryBinding? = null
     private val binding get() = _binding!!
-
-    private var selectedIntakeStatus: String = "다 먹음"
-    private val selectedSymptoms = mutableSetOf<String>()
-    private var selectedPreference: Int = 4
 
     private lateinit var mealPreviewIv: ImageView
     private lateinit var imagePlaceholderLayout: View
@@ -39,13 +53,40 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
     private var selectedImageUri: Uri? = null
     private lateinit var diaryMode: DiaryMode
 
+    private var petId: Long = -1L
+    private var petName: String? = null
+    private var mealTime: String? = null
+    private var mealContent: String? = null
+
+    private var dailyDietId: Long = -1L
+    private var petMealScheduleId: Long = -1L
+    private var mealListCache: List<MealItem> = emptyList()
+
+    private var selectedIntakeStatus: String? = null
+    private val selectedSymptoms = mutableSetOf<String>()
+    private var selectedPreference: Int = 0
+
     companion object {
         private const val ARG_DIARY_MODE = "arg_diary_mode"
+        private const val ARG_PET_ID = "arg_pet_id"
+        private const val ARG_PET_NAME = "arg_pet_name"
+        private const val ARG_MEAL_TIME = "arg_meal_time"
+        private const val ARG_MEAL_CONTENT = "arg_meal_content"
 
-        fun newInstance(mode: DiaryMode): DiaryFragment {
+        fun newInstance(
+            mode: DiaryMode,
+            petId: Long,
+            petName: String? = null,
+            mealTime: String? = null,
+            mealContent: String? = null
+        ): DiaryFragment {
             return DiaryFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_DIARY_MODE, mode.name)
+                    putLong(ARG_PET_ID, petId)
+                    putString(ARG_PET_NAME, petName)
+                    putString(ARG_MEAL_TIME, mealTime)
+                    putString(ARG_MEAL_CONTENT, mealContent)
                 }
             }
         }
@@ -67,8 +108,14 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
             ?.let { DiaryMode.valueOf(it) }
             ?: DiaryMode.REGISTER
 
+        petId = arguments?.getLong(ARG_PET_ID, -1L) ?: -1L
+        petName = arguments?.getString(ARG_PET_NAME)
+        mealTime = arguments?.getString(ARG_MEAL_TIME)
+        mealContent = arguments?.getString(ARG_MEAL_CONTENT)
+
         initTopBar()
         initBackButton()
+        initMealInfo()
         initIntakeStatus()
         initSymptoms()
         initPreference()
@@ -76,7 +123,11 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         initSupplementInputs()
         initActionButton()
         applyModeUi()
-        openMealPop()
+        initMealLoadButton()
+
+        if (diaryMode == DiaryMode.REGISTER) {
+            loadMealWriteForm(showDialog = false)
+        }
     }
 
     private fun initTopBar() {
@@ -115,11 +166,26 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         }
     }
 
+    private fun initMealInfo() {
+        val displayPetName = if (petName.isNullOrBlank()) "OO" else petName
+        binding.mealOwnerTv.text = "${displayPetName}의 식단"
+        binding.mealDateTv.text = getTodayDisplayDate()
+
+        binding.pageTitleChipTv.text = mealTime.orEmpty()
+
+        binding.mealFoodListTv.text = if (!mealContent.isNullOrBlank()) {
+            mealContent
+        } else {
+            "등록된 식단이 없습니다."
+        }
+    }
+
     private fun initIntakeStatus() {
-        updateSingleSelect(
-            selectedView = binding.tvEatAll,
-            unselectedViews = listOf(binding.tvEatSome, binding.tvEatNone)
-        )
+        selectedIntakeStatus = null
+
+        setUnselectedStyle(binding.tvEatAll)
+        setUnselectedStyle(binding.tvEatSome)
+        setUnselectedStyle(binding.tvEatNone)
 
         binding.tvEatAll.setOnClickListener {
             if (diaryMode == DiaryMode.READ) return@setOnClickListener
@@ -153,6 +219,8 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
     }
 
     private fun initSymptoms() {
+        selectedSymptoms.clear()
+
         val symptomViews = listOf(
             binding.tvSymptomItch to "가려움",
             binding.tvSymptomDiarrhea to "설사",
@@ -161,7 +229,7 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         )
 
         symptomViews.forEach { (view, symptom) ->
-            updateMultiSelectView(view, selectedSymptoms.contains(symptom))
+            updateMultiSelectView(view, false)
 
             view.setOnClickListener {
                 if (diaryMode == DiaryMode.READ) return@setOnClickListener
@@ -178,6 +246,7 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
     }
 
     private fun initPreference() {
+        selectedPreference = 0
         updatePreferenceIndicators(selectedPreference)
 
         val indicators = listOf(
@@ -214,22 +283,54 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
                 openGallery()
             }
         }
-
-        binding.putFoodIv.setOnClickListener {
-            if (diaryMode == DiaryMode.READ) return@setOnClickListener
-            Toast.makeText(requireContext(), "음식 추가 클릭", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun initSupplementInputs() {
-        val testSupplements = listOf(
-            SupplementUiModel(id = 1L, name = "유산균", amount = 1),
-            SupplementUiModel(id = 2L, name = "오메가3", amount = 1),
-            SupplementUiModel(id = 3L, name = "비타민D", amount = 0),
-            SupplementUiModel(id = 4L, name = "루테인", amount = null)
-        )
+        if (petId == -1L) {
+            renderSupplementInputs(emptyList())
+            return
+        }
 
-        renderSupplementInputs(testSupplements)
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getCapsuleIntakes(petId)
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    val supplements = body?.capsules?.map { capsule ->
+                        SupplementUiModel(
+                            id = capsule.petCapsuleId,
+                            name = capsule.capsuleName,
+                            amount = null
+                        )
+                    }.orEmpty()
+
+                    renderSupplementInputs(supplements)
+                } else {
+                    Log.e("DiaryFragment", "영양제 조회 실패 code=${response.code()}")
+
+                    Toast.makeText(
+                        requireContext(),
+                        "영양제 정보를 불러올 수 없습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    renderSupplementInputs(emptyList())
+                }
+
+            } catch (e: Exception) {
+                Log.e("DiaryFragment", "영양제 조회 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "영양제 정보를 불러올 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                renderSupplementInputs(emptyList())
+            }
+        }
     }
 
     private fun renderSupplementInputs(items: List<SupplementUiModel>) {
@@ -247,6 +348,7 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
                 if (index % 2 == 0) {
                     rightMargin = dpToPx(32)
                 }
+
                 bottomMargin = dpToPx(12)
             }
 
@@ -344,22 +446,6 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         }
     }
 
-    private fun registerDiary() {
-        Toast.makeText(requireContext(), "등록 처리", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun updateDiary() {
-        val dialog = MealActionDialogFragment(
-            message = "밥 일기를 수정할까요?",
-            actionText = "수정하기"
-        ) {
-            Toast.makeText(requireContext(), "수정 완료 처리", Toast.LENGTH_SHORT).show()
-
-            parentFragmentManager.popBackStack()
-        }
-
-        dialog.show(parentFragmentManager, MealActionDialogFragment.TAG)
-    }
     private fun applyModeUi() {
         val isReadMode = diaryMode == DiaryMode.READ
 
@@ -380,6 +466,458 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         binding.preference3Iv.isEnabled = !isReadMode
         binding.preference4Iv.isEnabled = !isReadMode
         binding.preference5Iv.isEnabled = !isReadMode
+    }
+
+    private fun initMealLoadButton() {
+        binding.putFoodIv.setOnClickListener {
+            if (diaryMode == DiaryMode.READ) return@setOnClickListener
+
+            if (petId == -1L) {
+                Toast.makeText(
+                    requireContext(),
+                    "반려동물 정보를 확인할 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            if (mealListCache.isNotEmpty()) {
+                showMealLoadDialog()
+            } else {
+                loadMealWriteForm(showDialog = true)
+            }
+        }
+    }
+
+    private fun loadMealWriteForm(showDialog: Boolean) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val today = getTodayApiDate()
+
+                Log.d("DiaryFragment", "식단 조회 요청 petId=$petId, date=$today")
+
+                val response = RetrofitClient.apiService.getMealWriteForm(
+                    petId = petId,
+                    date = today
+                )
+
+                Log.d("DiaryFragment", "식단 조회 응답 code=${response.code()}")
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body == null) {
+                        Toast.makeText(
+                            requireContext(),
+                            "식단 정보를 불러올 수 없습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@launch
+                    }
+
+                    dailyDietId = body.dailyDietId
+                    petName = body.petName
+
+                    binding.mealOwnerTv.text = "${body.petName}의 식단"
+                    binding.mealDateTv.text = formatApiDateToDisplayDate(body.dietDate)
+
+                    mealListCache = body.meals.map { meal ->
+                        MealItem(
+                            mealId = meal.petMealScheduleId,
+                            time = meal.mealTime.take(5),
+                            content = meal.description,
+                            isFed = false
+                        )
+                    }
+
+                    if (mealListCache.isEmpty()) {
+                        Toast.makeText(
+                            requireContext(),
+                            "등록된 식단이 없습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@launch
+                    }
+
+                    autoBindCurrentMealId()
+
+                    if (showDialog) {
+                        showMealLoadDialog()
+                    }
+
+                } else {
+                    val errorMessage = try {
+                        response.errorBody()?.string()
+                    } catch (e: Exception) {
+                        null
+                    }
+
+                    Log.e(
+                        "DiaryFragment",
+                        "식단 조회 실패 code=${response.code()}, error=$errorMessage"
+                    )
+
+                    Toast.makeText(
+                        requireContext(),
+                        "불러올 수 있는 식단이 없습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                Log.e("DiaryFragment", "식단 조회 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "식단 정보를 불러올 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun autoBindCurrentMealId() {
+        if (petMealScheduleId != -1L) return
+
+        val matchedMeal = mealListCache.firstOrNull { meal ->
+            !mealTime.isNullOrBlank() && meal.time == mealTime
+        } ?: mealListCache.firstOrNull { meal ->
+            !mealContent.isNullOrBlank() && meal.content == mealContent
+        } ?: mealListCache.firstOrNull()
+
+        if (matchedMeal != null) {
+            applySelectedMeal(matchedMeal)
+        }
+    }
+
+    private fun showMealLoadDialog() {
+        val dialog = MealLoadDialogFragment(mealListCache) { selectedMeal ->
+            applySelectedMeal(selectedMeal)
+        }
+
+        dialog.show(parentFragmentManager, "MealLoadDialog")
+    }
+
+    private fun applySelectedMeal(selectedMeal: MealItem) {
+        petMealScheduleId = selectedMeal.mealId
+        mealTime = selectedMeal.time
+        mealContent = selectedMeal.content
+
+        binding.pageTitleChipTv.text = selectedMeal.time
+        binding.mealFoodListTv.text = selectedMeal.content
+
+        Log.d(
+            "DiaryFragment",
+            "선택된 식단 dailyDietId=$dailyDietId, petMealScheduleId=$petMealScheduleId, time=$mealTime"
+        )
+    }
+
+    private fun registerDiary() {
+        if (petId == -1L) {
+            Toast.makeText(
+                requireContext(),
+                "반려동물 정보를 확인할 수 없습니다.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        if (dailyDietId == -1L || petMealScheduleId == -1L) {
+            Toast.makeText(
+                requireContext(),
+                "등록할 식단 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            loadMealWriteForm(showDialog = false)
+            return
+        }
+
+        if (selectedPreference == 0) {
+            Toast.makeText(
+                requireContext(),
+                "선호도를 선택해주세요.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        if (selectedIntakeStatus.isNullOrBlank()) {
+            Toast.makeText(
+                requireContext(),
+                "섭취 상태를 선택해주세요.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val imageUri = selectedImageUri
+        if (imageUri == null) {
+            Toast.makeText(
+                requireContext(),
+                "식단 사진을 첨부해주세요.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val waterIntakeMl = binding.waterAmountEt.text.toString()
+            .trim()
+            .toBigDecimalOrNull() ?: 0.toBigDecimal()
+
+        val memo = binding.memoEt.text.toString()
+            .trim()
+            .takeIf { it.isNotBlank() }
+
+        val requestDto = MealDiaryCreateRequest(
+            petId = petId,
+            dailyDietId = dailyDietId,
+            petMealScheduleId = petMealScheduleId,
+            diaryDate = getTodayApiDate(),
+            satisfaction = mapSatisfaction(selectedPreference),
+            mealStatus = mapMealStatus(selectedIntakeStatus),
+            waterIntakeMl = waterIntakeMl,
+            memo = memo,
+            symptoms = selectedSymptoms.map { mapSymptom(it) },
+            capsules = getCapsuleRequestList()
+        )
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val json = Gson().toJson(requestDto)
+
+                Log.d("DiaryFragment", "밥 일기 등록 request=$json")
+
+                val requestBody = json.toRequestBody(
+                    "application/json; charset=utf-8".toMediaType()
+                )
+
+                val imagePart = createImagePart(imageUri)
+
+                val response = RetrofitClient.apiService.createMealDiary(
+                    request = requestBody,
+                    image = imagePart
+                )
+
+                Log.d("DiaryFragment", "밥 일기 등록 응답 code=${response.code()}")
+
+                if (response.isSuccessful) {
+                    Toast.makeText(
+                        requireContext(),
+                        "밥 일기가 등록되었습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    parentFragmentManager.popBackStack()
+                } else {
+                    val errorMessage = try {
+                        response.errorBody()?.string()
+                    } catch (e: Exception) {
+                        null
+                    }
+
+                    Log.e(
+                        "DiaryFragment",
+                        "밥 일기 등록 실패 code=${response.code()}, error=$errorMessage"
+                    )
+
+                    Toast.makeText(
+                        requireContext(),
+                        "밥 일기를 등록할 수 없습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                Log.e("DiaryFragment", "밥 일기 등록 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "밥 일기 등록 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun getCapsuleRequestList(): List<MealDiaryCapsuleRequest> {
+        val result = mutableListOf<MealDiaryCapsuleRequest>()
+
+        for (i in 0 until binding.supplementContainer.childCount) {
+            val rowView = binding.supplementContainer.getChildAt(i)
+
+            if (rowView is LinearLayout) {
+                for (j in 0 until rowView.childCount) {
+                    val child = rowView.getChildAt(j)
+
+                    if (child is EditText) {
+                        val petCapsuleId = child.tag as? Long ?: continue
+                        val givenCount = child.text.toString()
+                            .trim()
+                            .toIntOrNull() ?: 0
+
+                        result.add(
+                            MealDiaryCapsuleRequest(
+                                petCapsuleId = petCapsuleId,
+                                givenCount = givenCount
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+
+    private fun createImagePart(uri: Uri): MultipartBody.Part {
+        val file = uriToTempFile(uri)
+        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+
+        return MultipartBody.Part.createFormData(
+            name = "image",
+            filename = file.name,
+            body = requestFile
+        )
+    }
+
+    private fun uriToTempFile(uri: Uri): File {
+        val fileName = getFileNameFromUri(uri)
+        val tempFile = File(requireContext().cacheDir, fileName)
+
+        requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
+            FileOutputStream(tempFile).use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+
+        return tempFile
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String {
+        var fileName = "meal_diary_${System.currentTimeMillis()}.jpg"
+
+        val cursor = requireContext().contentResolver.query(
+            uri,
+            null,
+            null,
+            null,
+            null
+        )
+
+        cursor?.use {
+            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (nameIndex >= 0 && it.moveToFirst()) {
+                fileName = it.getString(nameIndex)
+            }
+        }
+
+        return fileName
+    }
+
+    private fun mapSatisfaction(score: Int): String {
+        return when (score) {
+            1 -> "VERY_BAD"
+            2 -> "BAD"
+            3 -> "NORMAL"
+            4 -> "GOOD"
+            5 -> "VERY_GOOD"
+            else -> "NORMAL"
+        }
+    }
+
+    private fun mapMealStatus(status: String?): String {
+        return when (status) {
+            "다 먹음" -> "FINISHED"
+            "조금 남김" -> "LEFT_SOME"
+            "안 먹음" -> "NOT_EATEN"
+            else -> "NOT_EATEN"
+        }
+    }
+
+    private fun mapSymptom(symptom: String): String {
+        return when (symptom) {
+            "구토" -> "VOMITING"
+            "무기력" -> "LETHARGY"
+            "가려움" -> "ITCHING"
+            "설사" -> "DIARRHEA"
+            else -> symptom
+        }
+    }
+
+    private fun updateDiary() {
+        val dialog = MealActionDialogFragment(
+            message = "밥 일기를 수정할까요?",
+            actionText = "수정하기"
+        ) {
+            Toast.makeText(requireContext(), "수정 완료 처리", Toast.LENGTH_SHORT).show()
+            parentFragmentManager.popBackStack()
+        }
+
+        dialog.show(parentFragmentManager, MealActionDialogFragment.TAG)
+    }
+
+    private fun showCustomMoreMenu() {
+        val popupView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.view_diary_more_menu, null)
+
+        val popupWindow = PopupWindow(
+            popupView,
+            dpToPx(150),
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            true
+        ).apply {
+            isOutsideTouchable = true
+            setBackgroundDrawable(ColorDrawable())
+            elevation = dpToPx(6).toFloat()
+        }
+
+        val editLayout = popupView.findViewById<View>(R.id.menu_edit_layout)
+        val deleteLayout = popupView.findViewById<View>(R.id.menu_delete_layout)
+
+        editLayout.visibility =
+            if (diaryMode == DiaryMode.READ) View.VISIBLE else View.GONE
+
+        deleteLayout.visibility =
+            if (diaryMode == DiaryMode.READ || diaryMode == DiaryMode.EDIT) View.VISIBLE else View.GONE
+
+        editLayout.setOnClickListener {
+            popupWindow.dismiss()
+
+            parentFragmentManager.beginTransaction()
+                .replace(
+                    R.id.fragment_container,
+                    DiaryFragment.newInstance(
+                        mode = DiaryMode.EDIT,
+                        petId = petId,
+                        petName = petName,
+                        mealTime = mealTime,
+                        mealContent = mealContent
+                    )
+                )
+                .addToBackStack(null)
+                .commit()
+        }
+
+        deleteLayout.setOnClickListener {
+            popupWindow.dismiss()
+
+            val dialog = MealActionDialogFragment(
+                message = "밥 일기를 삭제할까요?",
+                actionText = "삭제하기"
+            ) {
+                deleteDiary()
+            }
+
+            dialog.show(parentFragmentManager, MealActionDialogFragment.TAG)
+        }
+
+        popupWindow.showAsDropDown(binding.mealMoreIv, -dpToPx(150), dpToPx(8))
+    }
+
+    private fun deleteDiary() {
+        Toast.makeText(requireContext(), "삭제 완료", Toast.LENGTH_SHORT).show()
+        requireActivity().onBackPressedDispatcher.onBackPressed()
     }
 
     private fun updateSingleSelect(
@@ -442,59 +980,29 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         mealPreviewIv.setImageURI(uri)
     }
 
-    private fun showCustomMoreMenu() {
-        val popupView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.view_diary_more_menu, null)
-
-        val popupWindow = PopupWindow(
-            popupView,
-            dpToPx(150),
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            true
-        ).apply {
-            isOutsideTouchable = true
-            setBackgroundDrawable(ColorDrawable())
-            elevation = dpToPx(6).toFloat()
-        }
-
-        val editLayout = popupView.findViewById<View>(R.id.menu_edit_layout)
-        val deleteLayout = popupView.findViewById<View>(R.id.menu_delete_layout)
-
-        editLayout.visibility =
-            if (diaryMode == DiaryMode.READ) View.VISIBLE else View.GONE
-
-        deleteLayout.visibility =
-            if (diaryMode == DiaryMode.READ || diaryMode == DiaryMode.EDIT) View.VISIBLE else View.GONE
-
-        editLayout.setOnClickListener {
-            popupWindow.dismiss()
-
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, DiaryFragment.newInstance(DiaryMode.EDIT))
-                .addToBackStack(null)
-                .commit()
-        }
-
-        deleteLayout.setOnClickListener {
-            popupWindow.dismiss()
-
-            val dialog = MealActionDialogFragment(
-                message = "밥 일기를 삭제할까요?",
-                actionText = "삭제하기"
-            ) {
-                deleteDiary()
-            }
-
-            dialog.show(parentFragmentManager, MealActionDialogFragment.TAG)
-        }
-
-        popupWindow.showAsDropDown(binding.mealMoreIv, -dpToPx(150), dpToPx(8))
+    private fun getTodayApiDate(): String {
+        return SimpleDateFormat("yyyy-MM-dd", Locale.KOREA).format(Date())
     }
 
-    private fun deleteDiary() {
-        Toast.makeText(requireContext(), "삭제 완료", Toast.LENGTH_SHORT).show()
+    private fun getTodayDisplayDate(): String {
+        return SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(Date())
+    }
 
-        requireActivity().onBackPressedDispatcher.onBackPressed()
+    private fun formatApiDateToDisplayDate(apiDate: String?): String {
+        if (apiDate.isNullOrBlank()) return getTodayDisplayDate()
+
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.KOREA)
+            val outputFormat = SimpleDateFormat("yyyy.MM.dd", Locale.KOREA)
+            val date = inputFormat.parse(apiDate)
+            if (date != null) {
+                outputFormat.format(date)
+            } else {
+                getTodayDisplayDate()
+            }
+        } catch (e: Exception) {
+            getTodayDisplayDate()
+        }
     }
 
     private fun getDrawableCompat(drawableRes: Int): Drawable? {
@@ -521,37 +1029,4 @@ class DiaryFragment : Fragment(R.layout.fragment_diary) {
         val name: String,
         val amount: Int
     )
-
-    private fun openMealPop() {
-
-        binding.putFoodIv.setOnClickListener {
-            val mealList = listOf(
-                MealItem(
-                    mealId = 1L,
-                    time = "08:30",
-                    content = "삶은 닭가슴살 30g, 브로콜리 10g, 단호박 20g",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 2L,
-                    time = "13:00",
-                    content = "흑돼지 치즈볼 1개, 닭오돌뼈 10g, 플라그오프, 뉴로액트",
-                    isFed = false
-                ),
-                MealItem(
-                    mealId = 3L,
-                    time = "18:40",
-                    content = "연어 25g, 고구마 15g, 유산균, 오메가3",
-                    isFed = false
-                )
-            )
-
-            val dialog = MealLoadDialogFragment(mealList) { selectedMeal ->
-                binding.pageTitleChipTv.text = selectedMeal.time
-                binding.mealFoodListTv.text = selectedMeal.content
-            }
-
-            dialog.show(parentFragmentManager, "MealLoadDialog")
-        }
-    }
 }

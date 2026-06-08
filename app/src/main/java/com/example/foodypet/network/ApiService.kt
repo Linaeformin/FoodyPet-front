@@ -4,10 +4,12 @@ import com.example.foodypet.data.auth.LoginRequest
 import com.example.foodypet.data.auth.RefreshTokenRequest
 import com.example.foodypet.data.auth.TokenResponse
 import com.example.foodypet.data.remote.dto.BasicResponse
+import com.example.foodypet.home.dto.CapsuleIntakeResponse
 import com.example.foodypet.home.dto.DietAnalysisResponse
 import com.example.foodypet.home.dto.DietRecommendRequest
 import com.example.foodypet.home.dto.DietRecommendResponse
 import com.example.foodypet.home.dto.HomeTodayResponse
+import com.example.foodypet.home.dto.MealWriteFormResponse
 import com.example.foodypet.stock.dto.AssignFoodStockRequest
 import com.example.foodypet.stock.dto.CommonResponse
 import com.example.foodypet.stock.dto.FoodListResponse
@@ -15,6 +17,7 @@ import com.example.foodypet.stock.dto.FoodType
 import com.example.foodypet.stock.dto.PetFoodStockSortType
 import com.example.foodypet.stock.dto.StockResponse
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -75,4 +78,22 @@ interface ApiService {
     suspend fun confirmDiet(
         @Path("dietId") dietId: Long
     ): Response<CommonResponse>
+
+    @GET("api/pets/{petId}/capsule-intakes")
+    suspend fun getCapsuleIntakes(
+        @Path("petId") petId: Long
+    ): Response<CapsuleIntakeResponse>
+
+    @GET("api/diaries/meals/write-form")
+    suspend fun getMealWriteForm(
+        @Query("petId") petId: Long,
+        @Query("date") date: String
+    ): Response<MealWriteFormResponse>
+
+    @Multipart
+    @POST("api/diaries/meals")
+    suspend fun createMealDiary(
+        @Part("request") request: RequestBody,
+        @Part image: MultipartBody.Part
+    ): Response<Unit>
 }

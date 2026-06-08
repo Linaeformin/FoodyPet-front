@@ -31,6 +31,11 @@ class HomeFragment : Fragment() {
     private var petList: List<PetPagerItem> = emptyList()
     private var currentPetPosition = 0
 
+    override fun onResume() {
+        super.onResume()
+        loadTodayDiaries()
+    }
+
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
@@ -68,8 +73,6 @@ class HomeFragment : Fragment() {
         popupWater()
         popupMedicine()
         moveStock()
-
-        loadTodayDiaries()
     }
 
     private fun loadTodayDiaries() {
@@ -383,8 +386,42 @@ class HomeFragment : Fragment() {
 
     private fun moveDiary() {
         binding.homeFoodDiaryRecordCv.setOnClickListener {
+            if (petList.isEmpty()) {
+                Toast.makeText(
+                    requireContext(),
+                    "등록된 반려동물이 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            if (currentPetPosition !in petList.indices) {
+                Toast.makeText(
+                    requireContext(),
+                    "반려동물 정보를 확인할 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            val currentPet = petList[currentPetPosition]
+
+            Log.d(
+                "HomeFragment",
+                "밥일기 등록 이동 petId=${currentPet.petId}, petName=${currentPet.name}, mealTime=${currentPet.mealTime}, mealContent=${currentPet.mealContent}"
+            )
+
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, DiaryFragment.newInstance(DiaryMode.REGISTER))
+                .replace(
+                    R.id.fragment_container,
+                    DiaryFragment.newInstance(
+                        mode = DiaryMode.REGISTER,
+                        petId = currentPet.petId,
+                        petName = currentPet.name,
+                        mealTime = currentPet.mealTime,
+                        mealContent = currentPet.mealContent
+                    )
+                )
                 .addToBackStack(null)
                 .commit()
         }
