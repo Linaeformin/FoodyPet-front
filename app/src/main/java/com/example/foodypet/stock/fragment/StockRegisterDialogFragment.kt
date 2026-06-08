@@ -10,21 +10,26 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.example.foodypet.R
 import com.example.foodypet.databinding.DialogStockRegisterBinding
+import com.example.foodypet.network.RetrofitClient
+import com.example.foodypet.stock.dto.AssignFoodStockRequest
 import com.example.foodypet.stock.enum.StockCategory
 import com.example.foodypet.stock.enum.StockDialogMode
+import kotlinx.coroutines.launch
 
 class StockRegisterDialogFragment : DialogFragment() {
 
     private var _binding: DialogStockRegisterBinding? = null
     private val binding get() = _binding!!
 
-    private var isSnackChecked = true
+    private var isSnackChecked = false
     private var selectedCategory = StockCategory.COOKED
     private var selectedNutritionImageUri: Uri? = null
 
@@ -40,6 +45,22 @@ class StockRegisterDialogFragment : DialogFragment() {
         arguments?.getString(ARG_MODE)?.let { modeName ->
             StockDialogMode.valueOf(modeName)
         } ?: StockDialogMode.EXIST
+    }
+
+    private val dialogTitle: String by lazy {
+        arguments?.getString(ARG_TITLE) ?: "재고 등록"
+    }
+
+    private val selectedProductName: String by lazy {
+        arguments?.getString(ARG_PRODUCT_NAME).orEmpty()
+    }
+
+    private val selectedFoodId: Long? by lazy {
+        if (arguments?.containsKey(ARG_FOOD_ID) == true) {
+            arguments?.getLong(ARG_FOOD_ID)
+        } else {
+            null
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,10 +98,17 @@ class StockRegisterDialogFragment : DialogFragment() {
 
         binding.dialogTitleTv.text = dialogTitle
 
+        applySelectedProduct()
         applyDialogMode()
         initUnitDropdown()
         initCategoryClickListeners()
         initClickListeners()
+    }
+
+    private fun applySelectedProduct() {
+        if (selectedProductName.isNotBlank()) {
+            binding.productNameTv.text = selectedProductName
+        }
     }
 
     private fun applyDialogMode() {
@@ -89,7 +117,7 @@ class StockRegisterDialogFragment : DialogFragment() {
                 binding.stockCategoryLayout.visibility = View.GONE
                 binding.nutritionContainer.visibility = View.GONE
 
-                isSnackChecked = true
+                isSnackChecked = false
                 updateSnackCheckImage()
             }
 
@@ -99,7 +127,7 @@ class StockRegisterDialogFragment : DialogFragment() {
 
                 selectCategory(StockCategory.COOKED)
 
-                isSnackChecked = true
+                isSnackChecked = false
                 updateSnackCheckImage()
             }
         }
@@ -123,6 +151,8 @@ class StockRegisterDialogFragment : DialogFragment() {
         binding.unitDropdownActv.setOnItemClickListener { _, _, position, _ ->
             binding.unitDropdownActv.setText(units[position], false)
         }
+
+        binding.unitDropdownActv.setText("g", false)
     }
 
     private fun initCategoryClickListeners() {
@@ -161,39 +191,125 @@ class StockRegisterDialogFragment : DialogFragment() {
         }
 
         binding.stockAssignBtn.setOnClickListener {
-            val productName = binding.productNameTv.text.toString()
-            val expiredDate = binding.expiredDateEt.text.toString()
-            val quantity = binding.quantityEt.text.toString()
-            val unit = binding.unitDropdownActv.text.toString()
-
             when (dialogMode) {
                 StockDialogMode.EXIST -> {
-                    // TODO: 기존 상품 재고 등록
-                    // viewModel.registerExistStock(
-                    //     productName = productName,
-                    //     expiredDate = expiredDate,
-                    //     quantity = quantity.toInt(),
-                    //     unit = unit,
-                    //     isSnack = isSnackChecked
-                    // )
+                    assignExistingFoodStock()
                 }
 
                 StockDialogMode.NOT_EXIST -> {
-                    // TODO: 신규 상품 재고 등록
-                    // selectedNutritionImageUri를 서버에 multipart로 넘기면 됨
-                    // viewModel.registerNotExistStock(
-                    //     productName = productName,
-                    //     category = selectedCategory,
-                    //     expiredDate = expiredDate,
-                    //     quantity = quantity.toInt(),
-                    //     unit = unit,
-                    //     isSnack = isSnackChecked,
-                    //     nutritionImageUri = selectedNutritionImageUri
-                    // )
+                    // TODO: 신규 상품 직접 등록 API는 별도 명세 받으면 연결
+                    Toast.makeText(
+                        requireContext(),
+                        "직접 등록 API는 아직 연결되지 않았습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
+        }
+    }
 
-            dismiss()
+    private fun assignExistingFoodStock() {
+        val foodId = selectedFoodId
+
+        if (foodId == null) {
+            Toast.makeText(
+                requireContext(),
+                "상품 정보를 찾을 수 없습니다.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val expiredDate = binding.expiredDateEt.text.toString().trim()
+        val quantityText = binding.quantityEt.text.toString().trim()
+        val unitText = binding.unitDropdownActv.text.toString().trim()
+
+        if (expiredDate.isBlank()) {
+            Toast.makeText(
+                requireContext(),
+                "유통기한을 입력해주세요.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        if (quantityText.isBlank()) {
+            Toast.makeText(
+                requireContext(),
+                "총 수량을 입력해주세요.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val quantity = quantityText.toIntOrNull()
+
+        if (quantity == null || quantity <= 0) {
+            Toast.makeText(
+                requireContext(),
+                "수량은 1 이상으로 입력해주세요.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val request = AssignFoodStockRequest(
+            foodId = foodId,
+            expiredAt = expiredDate.toServerDate(),
+            isTreat = isSnackChecked,
+            unit = unitText.toServerUnit(),
+            quantity = quantity
+        )
+
+        binding.stockAssignBtn.isEnabled = false
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.assignFoodStock(request)
+
+                if (response.isSuccessful) {
+                    val message = response.body()?.message ?: "재고 등록이 완료되었습니다."
+
+                    Toast.makeText(
+                        requireContext(),
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    dismiss()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "재고를 등록할 수 없습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    binding.stockAssignBtn.isEnabled = true
+                }
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "서버와 연결할 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                binding.stockAssignBtn.isEnabled = true
+            }
+        }
+    }
+
+    private fun String.toServerDate(): String {
+        return this.trim().replace(".", "-")
+    }
+
+    private fun String.toServerUnit(): String {
+        return when (this) {
+            "g" -> "GRAM"
+            "ml" -> "ML"
+            "개" -> "COUNT"
+            "봉" -> "BAG"
+            else -> "GRAM"
         }
     }
 
@@ -251,7 +367,8 @@ class StockRegisterDialogFragment : DialogFragment() {
             R.font.scdream_light
         }
 
-        textView.typeface = ResourcesCompat.getFont(requireContext(), fontRes) ?: Typeface.DEFAULT
+        textView.typeface =
+            ResourcesCompat.getFont(requireContext(), fontRes) ?: Typeface.DEFAULT
     }
 
     private fun toggleSnackCheck() {
@@ -281,21 +398,29 @@ class StockRegisterDialogFragment : DialogFragment() {
     companion object {
         private const val ARG_MODE = "mode"
         private const val ARG_TITLE = "title"
+        private const val ARG_PRODUCT_NAME = "product_name"
+        private const val ARG_FOOD_ID = "food_id"
 
         fun newInstance(
             mode: StockDialogMode,
-            title: String = "재고 등록"
+            title: String = "재고 등록",
+            productName: String? = null,
+            foodId: Long? = null
         ): StockRegisterDialogFragment {
             return StockRegisterDialogFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_MODE, mode.name)
                     putString(ARG_TITLE, title)
+
+                    if (!productName.isNullOrBlank()) {
+                        putString(ARG_PRODUCT_NAME, productName)
+                    }
+
+                    if (foodId != null) {
+                        putLong(ARG_FOOD_ID, foodId)
+                    }
                 }
             }
         }
-    }
-
-    private val dialogTitle: String by lazy {
-        arguments?.getString(ARG_TITLE) ?: "재고 등록"
     }
 }

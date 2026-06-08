@@ -1,8 +1,15 @@
 package com.example.foodypet.stock.adapter
 
+import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.foodypet.R
 import com.example.foodypet.databinding.ItemStockAssignBinding
 import com.example.foodypet.stock.enum.StockCategory
@@ -43,18 +50,53 @@ class StockAssignAdapter(
         private val binding: ItemStockAssignBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: StockItem) {
-            binding.productNameTv.text = item.name
-            binding.productCategoryTv.text = getCategoryText(item.category)
+        fun bind(item: StockItem) = with(binding) {
+            productNameTv.text = item.name
+            productCategoryTv.text = getCategoryText(item.category)
 
-            // 현재 StockItem에 이미지 필드가 없어서 임시 이미지 사용
-            binding.productIv.setImageResource(R.drawable.image_rampocket)
+            Log.d("StockAssignAdapter", "상품 이미지 로드 시도: ${item.name}, ${item.imageUrl}")
 
-            binding.nutritionBtn.setOnClickListener {
+            Glide.with(root.context)
+                .load(item.imageUrl)
+                .placeholder(R.drawable.image_rampocket)
+                .error(R.drawable.image_rampocket)
+                .listener(object : RequestListener<Drawable> {
+
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        Log.e(
+                            "StockAssignAdapter",
+                            "상품 이미지 로드 실패: ${item.name}, url=${item.imageUrl}",
+                            e
+                        )
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        Log.d(
+                            "StockAssignAdapter",
+                            "상품 이미지 로드 성공: ${item.name}, url=${item.imageUrl}"
+                        )
+                        return false
+                    }
+                })
+                .into(productIv)
+
+            nutritionBtn.setOnClickListener {
                 onClickNutrition(item)
             }
 
-            binding.stockAssignBtn.setOnClickListener {
+            stockAssignBtn.setOnClickListener {
                 onClickAssign(item)
             }
         }

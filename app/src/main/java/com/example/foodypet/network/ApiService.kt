@@ -5,6 +5,9 @@ import com.example.foodypet.data.auth.RefreshTokenRequest
 import com.example.foodypet.data.auth.TokenResponse
 import com.example.foodypet.data.remote.dto.BasicResponse
 import com.example.foodypet.home.dto.HomeTodayResponse
+import com.example.foodypet.stock.dto.AssignFoodStockRequest
+import com.example.foodypet.stock.dto.CommonResponse
+import com.example.foodypet.stock.dto.FoodListResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -35,5 +38,12 @@ interface ApiService {
     @GET("api/diaries/today")
     suspend fun getTodayDiaries(): Response<HomeTodayResponse>
 
+    @GET("api/foods")
+    suspend fun getFoods(): Response<FoodListResponse>
+
+    @POST("api/foods/assign")
+    suspend fun assignFoodStock(
+        @Body request: AssignFoodStockRequest
+    ): Response<CommonResponse>
 
 }
