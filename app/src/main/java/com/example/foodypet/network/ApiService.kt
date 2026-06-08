@@ -8,6 +8,9 @@ import com.example.foodypet.home.dto.HomeTodayResponse
 import com.example.foodypet.stock.dto.AssignFoodStockRequest
 import com.example.foodypet.stock.dto.CommonResponse
 import com.example.foodypet.stock.dto.FoodListResponse
+import com.example.foodypet.stock.dto.FoodType
+import com.example.foodypet.stock.dto.PetFoodStockSortType
+import com.example.foodypet.stock.dto.StockResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -15,6 +18,7 @@ import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -45,5 +49,12 @@ interface ApiService {
     suspend fun assignFoodStock(
         @Body request: AssignFoodStockRequest
     ): Response<CommonResponse>
+
+    @GET("api/foods/stocks")
+    suspend fun getStocks(
+        @Query("foodType") foodType: FoodType,
+        @Query("treat") treat: Boolean = false,
+        @Query("sort") sort: PetFoodStockSortType
+    ): Response<StockResponse>
 
 }

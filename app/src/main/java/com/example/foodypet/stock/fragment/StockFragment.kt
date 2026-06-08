@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -12,16 +13,23 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentStockBinding
+import com.example.foodypet.network.RetrofitClient
 import com.example.foodypet.stock.adapter.StockAdapter
+import com.example.foodypet.stock.dto.FoodType
+import com.example.foodypet.stock.dto.PetFoodStockSortType
+import com.example.foodypet.stock.dto.StockItemResponse
 import com.example.foodypet.stock.enum.StockCategory
 import com.example.foodypet.stock.enum.StockDialogMode
 import com.example.foodypet.stock.enum.StockScreenMode
 import com.example.foodypet.stock.enum.StockSourceType
 import com.example.foodypet.stock.model.StockItem
+import com.example.foodypet.util.toStockQuantityWithUnitText
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.launch
 
 class StockFragment : Fragment(R.layout.fragment_stock) {
 
@@ -45,194 +53,6 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
 
     private val stockItems = mutableListOf<StockItem>()
 
-//    private val stockItems = mutableListOf(
-//        StockItem(
-//            "26.11.30",
-//            "흑돼지 치즈볼",
-//            "1봉",
-//            StockCategory.COOKED,
-//            false,
-//            "2025.03.01",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "26.08.15",
-//            "닭고기 완자",
-//            "2봉",
-//            StockCategory.COOKED,
-//            false,
-//            "2025.01.20",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "26.12.05",
-//            "소고기 미트볼",
-//            "1팩",
-//            StockCategory.COOKED,
-//            false,
-//            "2025.04.10",
-//            StockSourceType.USER
-//        ),
-//        StockItem(
-//            "26.09.01",
-//            "오리 고기볼",
-//            "3봉",
-//            StockCategory.COOKED,
-//            false,
-//            "2025.02.12",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "26.07.20",
-//            "연어 큐브",
-//            "2팩",
-//            StockCategory.COOKED,
-//            false,
-//            "2025.05.03",
-//            StockSourceType.USER
-//        ),
-//
-//        StockItem(
-//            "25.01.10",
-//            "고구마 치킨볼",
-//            "1봉",
-//            StockCategory.COOKED,
-//            true,
-//            "2024.11.01",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "24.12.25",
-//            "한우 야채죽",
-//            "1팩",
-//            StockCategory.COOKED,
-//            true,
-//            "2024.10.15",
-//            StockSourceType.USER
-//        ),
-//        StockItem(
-//            "25.02.03",
-//            "단호박 미트볼",
-//            "2팩",
-//            StockCategory.COOKED,
-//            true,
-//            "2024.12.20",
-//            StockSourceType.SERVICE
-//        ),
-//
-//        StockItem(
-//            "26.12.01",
-//            "닭가슴살 습식캔",
-//            "2캔",
-//            StockCategory.WET,
-//            false,
-//            "2025.02.01",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "26.06.10",
-//            "참치 습식캔",
-//            "4캔",
-//            StockCategory.WET,
-//            false,
-//            "2025.01.11",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "25.03.05",
-//            "연어 습식파우치",
-//            "1개",
-//            StockCategory.WET,
-//            true,
-//            "2024.09.22",
-//            StockSourceType.USER
-//        ),
-//
-//        StockItem(
-//            "26.05.12",
-//            "생닭 안심살",
-//            "1팩",
-//            StockCategory.FRESH,
-//            false,
-//            "2025.03.15",
-//            StockSourceType.USER
-//        ),
-//        StockItem(
-//            "26.04.01",
-//            "생연어 슬라이스",
-//            "2팩",
-//            StockCategory.FRESH,
-//            false,
-//            "2025.02.18",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "25.02.14",
-//            "생오리 목뼈",
-//            "1팩",
-//            StockCategory.FRESH,
-//            true,
-//            "2024.08.30",
-//            StockSourceType.USER
-//        ),
-//
-//        StockItem(
-//            "26.10.01",
-//            "연어 건식 사료",
-//            "1봉",
-//            StockCategory.DRY,
-//            false,
-//            "2025.01.05",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "27.01.20",
-//            "양고기 건식 사료",
-//            "1봉",
-//            StockCategory.DRY,
-//            false,
-//            "2025.04.01",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "26.03.18",
-//            "오리 건식 사료",
-//            "2봉",
-//            StockCategory.DRY,
-//            false,
-//            "2025.02.25",
-//            StockSourceType.USER
-//        ),
-//
-//        StockItem(
-//            "26.08.15",
-//            "강아지 간식",
-//            "3개",
-//            StockCategory.SNACK,
-//            false,
-//            "2025.03.08",
-//            StockSourceType.SERVICE
-//        ),
-//        StockItem(
-//            "26.02.10",
-//            "고구마 스틱",
-//            "5개",
-//            StockCategory.SNACK,
-//            false,
-//            "2025.01.25",
-//            StockSourceType.USER
-//        ),
-//        StockItem(
-//            "25.01.01",
-//            "치킨 져키",
-//            "2개",
-//            StockCategory.SNACK,
-//            true,
-//            "2024.07.10",
-//            StockSourceType.SERVICE
-//        )
-//    )
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -241,7 +61,7 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         setupRecyclerView()
         initClickListeners()
         updateCategoryUi()
-        renderStockList()
+        loadStocks()
     }
 
     private fun setupRecyclerView() = with(binding) {
@@ -382,7 +202,7 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         stockEditCompleteBtn.setOnClickListener {
             when (currentScreenMode) {
                 StockScreenMode.VIEW -> {
-                    // 기본 모드에서는 버튼이 보이지 않으므로 처리 없음
+                    // 기본 모드에서는 버튼이 보이지 않음
                 }
 
                 StockScreenMode.EDIT -> {
@@ -395,6 +215,70 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
                 }
             }
         }
+    }
+
+    private fun loadStocks() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getStocks(
+                    foodType = selectedCategory.toApiFoodType(),
+                    treat = selectedCategory.isTreatCategory(),
+                    sort = selectedSortType.toApiSortType()
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    val availableStocks = body?.availableStocks.orEmpty()
+                    val expiredStocks = body?.expiredStocks.orEmpty()
+
+                    Log.d(TAG, "availableStocks: $availableStocks")
+                    Log.d(TAG, "expiredStocks: $expiredStocks")
+
+                    stockItems.clear()
+                    stockItems.addAll(
+                        availableStocks.map { it.toStockItem(isExpired = false) }
+                    )
+                    stockItems.addAll(
+                        expiredStocks.map { it.toStockItem(isExpired = true) }
+                    )
+
+                    renderStockList()
+
+                } else {
+                    Log.e(TAG, "error code: ${response.code()}")
+                    Log.e(TAG, "error body: ${response.errorBody()?.string()}")
+
+                    handleErrorResponse(response.code())
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "loadStocks error", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "서버와 연결할 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun handleErrorResponse(code: Int) {
+        val message = when (code) {
+            400 -> "재고 조회 요청 형식이 올바르지 않습니다."
+            401 -> "로그인이 필요합니다."
+            403 -> "재고 조회 권한이 없습니다."
+            404 -> "재고 정보를 찾을 수 없습니다."
+            500 -> "서버 오류가 발생했습니다."
+            else -> "재고 목록을 불러올 수 없습니다."
+        }
+
+        Toast.makeText(
+            requireContext(),
+            message,
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun enterEditMode() = with(binding) {
@@ -479,7 +363,11 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         val selectedItems = stockItems.filter { it.isSelected }
 
         if (selectedItems.isEmpty()) {
-            Toast.makeText(requireContext(), "삭제할 재고를 선택해줘", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "삭제할 재고를 선택해주세요.",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
@@ -590,7 +478,7 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
     private fun changeCategory(category: StockCategory) {
         selectedCategory = category
         updateCategoryUi()
-        renderStockList()
+        loadStocks()
     }
 
     private fun updateCategoryUi() = with(binding) {
@@ -633,20 +521,17 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
     }
 
     private fun renderStockList() = with(binding) {
-        val filteredItems = stockItems
-            .filter { it.category == selectedCategory }
-
         val sortedItems = when (selectedSortType) {
             StockSortType.NAME -> {
-                filteredItems.sortedBy { it.name }
+                stockItems.sortedBy { it.name }
             }
 
             StockSortType.CREATED -> {
-                filteredItems.sortedByDescending { it.createdAt }
+                stockItems.sortedByDescending { it.createdAt }
             }
 
             StockSortType.EXPIRE -> {
-                filteredItems.sortedBy { it.expireDate }
+                stockItems.sortedBy { it.expireDate }
             }
         }
 
@@ -682,21 +567,21 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         view.findViewById<TextView>(R.id.sort_name_tv).setOnClickListener {
             selectedSortType = StockSortType.NAME
             binding.stockSortTv.text = "가나다 순"
-            renderStockList()
+            loadStocks()
             dialog.dismiss()
         }
 
         view.findViewById<TextView>(R.id.sort_created_tv).setOnClickListener {
             selectedSortType = StockSortType.CREATED
             binding.stockSortTv.text = "등록 순"
-            renderStockList()
+            loadStocks()
             dialog.dismiss()
         }
 
         view.findViewById<TextView>(R.id.sort_expiration_tv).setOnClickListener {
             selectedSortType = StockSortType.EXPIRE
             binding.stockSortTv.text = "유통기한 순"
-            renderStockList()
+            loadStocks()
             dialog.dismiss()
         }
 
@@ -704,8 +589,65 @@ class StockFragment : Fragment(R.layout.fragment_stock) {
         dialog.show()
     }
 
+    private fun StockCategory.toApiFoodType(): FoodType {
+        return when (this) {
+            StockCategory.COOKED -> FoodType.COOKED
+            StockCategory.WET -> FoodType.WET
+            StockCategory.FRESH -> FoodType.RAW
+            StockCategory.DRY -> FoodType.DRY
+            StockCategory.SNACK -> FoodType.DRY
+        }
+    }
+
+    private fun StockCategory.isTreatCategory(): Boolean {
+        return this == StockCategory.SNACK
+    }
+
+    private fun StockSortType.toApiSortType(): PetFoodStockSortType {
+        return when (this) {
+            StockSortType.NAME -> PetFoodStockSortType.NAME
+            StockSortType.CREATED -> PetFoodStockSortType.CREATED
+            StockSortType.EXPIRE -> PetFoodStockSortType.EXPIRED
+        }
+    }
+
+    private fun StockItemResponse.toStockItem(isExpired: Boolean): StockItem {
+        return StockItem(
+            expireDate = expiredAt.replace("-", "."),
+            name = foodName,
+            count = quantity.toStockQuantityWithUnitText(unit),
+            category = foodType.toStockCategory(isTreat),
+            isExpired = isExpired,
+            createdAt = "",
+            sourceType = source.name.toStockSourceType()
+        )
+    }
+
+    private fun FoodType.toStockCategory(isTreat: Boolean): StockCategory {
+        if (isTreat) return StockCategory.SNACK
+
+        return when (this) {
+            FoodType.COOKED -> StockCategory.COOKED
+            FoodType.WET -> StockCategory.WET
+            FoodType.RAW -> StockCategory.FRESH
+            FoodType.DRY -> StockCategory.DRY
+        }
+    }
+
+    private fun String.toStockSourceType(): StockSourceType {
+        return when (this) {
+            "SYSTEM" -> StockSourceType.SERVICE
+            "CUSTOM" -> StockSourceType.USER
+            else -> StockSourceType.SERVICE
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        private const val TAG = "StockFragment"
     }
 }
