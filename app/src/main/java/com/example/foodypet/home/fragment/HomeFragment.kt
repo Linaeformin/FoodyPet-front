@@ -441,8 +441,34 @@ class HomeFragment : Fragment() {
 
     private fun moveDiaryList() {
         binding.homeFoodDiaryMealCv.setOnClickListener {
+            if (petList.isEmpty()) {
+                Toast.makeText(
+                    requireContext(),
+                    "등록된 반려동물이 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            if (currentPetPosition !in petList.indices) {
+                Toast.makeText(
+                    requireContext(),
+                    "반려동물 정보를 확인할 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            val currentPet = petList[currentPetPosition]
+
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, MealDiaryListFragment())
+                .replace(
+                    R.id.fragment_container,
+                    MealDiaryListFragment.newInstance(
+                        petId = currentPet.petId,
+                        petName = currentPet.name
+                    )
+                )
                 .addToBackStack(null)
                 .commit()
         }

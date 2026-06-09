@@ -3,14 +3,22 @@ package com.example.foodypet.home.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.foodypet.R
 import com.example.foodypet.databinding.ItemMealDiaryBinding
 import com.example.foodypet.home.model.MealDiaryItem
 
 class MealDiaryAdapter(
-    private val itemList: List<MealDiaryItem>,
     private val onItemClick: (MealDiaryItem) -> Unit
 ) : RecyclerView.Adapter<MealDiaryAdapter.MealDiaryViewHolder>() {
+
+    private val itemList = mutableListOf<MealDiaryItem>()
+
+    fun submitList(newList: List<MealDiaryItem>) {
+        itemList.clear()
+        itemList.addAll(newList)
+        notifyDataSetChanged()
+    }
 
     inner class MealDiaryViewHolder(
         private val binding: ItemMealDiaryBinding
@@ -21,7 +29,12 @@ class MealDiaryAdapter(
             tvStatus.text = item.status
             tvFoodDesc.text = item.foodDesc
             tvMemo.text = item.memo
-            ivFood.setImageResource(item.imageResId)
+
+            Glide.with(ivFood.context)
+                .load(item.imageUrl)
+                .placeholder(R.drawable.img_meal)
+                .error(R.drawable.img_meal)
+                .into(ivFood)
 
             setPreferenceIcons(item.preferenceCount)
 

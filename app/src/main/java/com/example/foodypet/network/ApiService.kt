@@ -10,6 +10,8 @@ import com.example.foodypet.home.dto.DietAnalysisResponse
 import com.example.foodypet.home.dto.DietRecommendRequest
 import com.example.foodypet.home.dto.DietRecommendResponse
 import com.example.foodypet.home.dto.HomeTodayResponse
+import com.example.foodypet.home.dto.MealDiaryDetailResponse
+import com.example.foodypet.home.dto.MealDiaryTodayResponse
 import com.example.foodypet.home.dto.MealWriteFormResponse
 import com.example.foodypet.home.dto.PetTreatDiaryCreateRequest
 import com.example.foodypet.home.dto.WaterIntakeCreateRequest
@@ -135,4 +137,14 @@ interface ApiService {
     suspend fun getTodayTreatDiaries(
         @Path("petId") petId: Long
     ): Response<List<TreatDiaryTodayResponse>>
+
+    @GET("api/diaries/meals/pets/{petId}/today")
+    suspend fun getTodayMealDiaries(
+        @Path("petId") petId: Long
+    ): Response<List<MealDiaryTodayResponse>>
+
+    @GET("api/diaries/meals/{diaryId}")
+    suspend fun getMealDiaryDetail(
+        @Path("diaryId") diaryId: Long
+    ): Response<MealDiaryDetailResponse>
 }

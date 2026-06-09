@@ -1,22 +1,27 @@
 package com.example.foodypet.mypage.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentMypageMealDiaryListBinding
 import com.example.foodypet.databinding.ItemMypageMealDiaryCalendarDayBinding
 import com.example.foodypet.databinding.ItemMypageMealDiaryCalendarHeaderBinding
 import com.example.foodypet.home.adapter.MealDiaryAdapter
+import com.example.foodypet.home.dto.MealDiaryTodayResponse
 import com.example.foodypet.home.enum.DiaryMode
 import com.example.foodypet.home.fragment.DiaryFragment
 import com.example.foodypet.home.model.MealDiaryItem
 import com.example.foodypet.mypage.adapter.MypageMealDiaryPetAdapter
 import com.example.foodypet.mypage.adapter.MypageMealDiaryPetItem
+import com.example.foodypet.network.RetrofitClient
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
@@ -29,6 +34,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 class MypageMealDiaryListFragment : Fragment() {
 
@@ -36,6 +42,7 @@ class MypageMealDiaryListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var petAdapter: MypageMealDiaryPetAdapter
+    private lateinit var mealDiaryAdapter: MealDiaryAdapter
 
     private var selectedPetId: Long? = null
     private var selectedLocalDate: LocalDate = LocalDate.now()
@@ -60,6 +67,7 @@ class MypageMealDiaryListFragment : Fragment() {
 
         initBackButton()
         initPetRecyclerView()
+        initMealDiaryRecyclerView()
         initCalendarView()
         loadPetList()
     }
@@ -80,6 +88,20 @@ class MypageMealDiaryListFragment : Fragment() {
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         mypageMealDiaryPetRv.adapter = petAdapter
+    }
+
+    private fun initMealDiaryRecyclerView() = with(binding) {
+        mealDiaryAdapter = MealDiaryAdapter(
+            onItemClick = { mealDiary ->
+                moveToDiaryFragment(mealDiary)
+            }
+        )
+
+        mypageMealDiaryRv.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = mealDiaryAdapter
+            setHasFixedSize(true)
+        }
     }
 
     private fun initCalendarView() = with(binding) {
@@ -126,122 +148,176 @@ class MypageMealDiaryListFragment : Fragment() {
     }
 
     private fun loadPetList() {
-        // TODO: 서버에서 반려동물 목록 받아오면 이 부분만 교체
-        val petList = listOf(
-            MypageMealDiaryPetItem(
-                petId = 1L,
-                petName = "랑이"
-            ),
-            MypageMealDiaryPetItem(
-                petId = 2L,
-                petName = "우동"
-            ),
-            MypageMealDiaryPetItem(
-                petId = 3L,
-                petName = "초코"
-            ),
-            MypageMealDiaryPetItem(
-                petId = 4L,
-                petName = "보리"
-            )
-        )
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getTodayDiaries()
 
-        petAdapter.submitList(petList)
+                if (response.isSuccessful) {
+                    val body = response.body()
 
-        if (petList.isNotEmpty()) {
-            val firstPet = petList.first()
+                    val petList = body?.pets?.map { pet ->
+                        MypageMealDiaryPetItem(
+                            petId = pet.petId,
+                            petName = pet.petName
+                        )
+                    } ?: emptyList()
 
-            selectedPetId = firstPet.petId
-            petAdapter.setSelectedPetId(firstPet.petId)
+                    petAdapter.submitList(petList)
 
-            loadMealDiaryList()
+                    if (petList.isNotEmpty()) {
+                        val firstPet = petList.first()
+
+                        selectedPetId = firstPet.petId
+                        petAdapter.setSelectedPetId(firstPet.petId)
+
+                        loadMealDiaryList()
+                    } else {
+                        mealDiaryAdapter.submitList(emptyList())
+
+                        Toast.makeText(
+                            requireContext(),
+                            "등록된 반려동물이 없습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                } else {
+                    Log.e(
+                        "MypageMealDiaryListFragment",
+                        "반려동물 목록 조회 실패 code=${response.code()}, error=${response.errorBody()?.string()}"
+                    )
+
+                    Toast.makeText(
+                        requireContext(),
+                        "반려동물 정보를 불러올 수 없습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                Log.e("MypageMealDiaryListFragment", "반려동물 목록 조회 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "서버 연결 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
     private fun loadMealDiaryList() {
         val petId = selectedPetId ?: return
 
-        // TODO: 서버 연결 시 petId, selectedDate 넘기면 됨
-        // ex) viewModel.getMealDiaryList(petId, selectedDate)
+        if (selectedLocalDate != LocalDate.now()) {
+            mealDiaryAdapter.submitList(emptyList())
 
-        val dummyMealDiaryList = getDummyMealDiaryList(petId)
+            Toast.makeText(
+                requireContext(),
+                "현재 API는 오늘 식단 기록만 조회할 수 있습니다.",
+                Toast.LENGTH_SHORT
+            ).show()
 
-        binding.mypageMealDiaryRv.layoutManager =
-            LinearLayoutManager(requireContext())
+            return
+        }
 
-        binding.mypageMealDiaryRv.adapter = MealDiaryAdapter(
-            itemList = dummyMealDiaryList,
-            onItemClick = { mealDiary ->
-                parentFragmentManager.beginTransaction()
-                    .replace(
-                        R.id.fragment_container,
-                        DiaryFragment.newInstance(
-                            mode = DiaryMode.READ,
-                            petId = petId
-                        )
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getTodayMealDiaries(petId)
+
+                if (response.isSuccessful) {
+                    val body = response.body() ?: emptyList()
+
+                    val mealDiaryList = body.map { diary ->
+                        diary.toMealDiaryItem()
+                    }
+
+                    mealDiaryAdapter.submitList(mealDiaryList)
+
+                    if (mealDiaryList.isEmpty()) {
+                        Toast.makeText(
+                            requireContext(),
+                            "오늘 등록된 식단 기록이 없습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                } else {
+                    Log.e(
+                        "MypageMealDiaryListFragment",
+                        "식단 기록 조회 실패 code=${response.code()}, error=${response.errorBody()?.string()}"
                     )
-                    .addToBackStack(null)
-                    .commit()
+
+                    Toast.makeText(
+                        requireContext(),
+                        "식단 기록을 불러올 수 없습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                Log.e("MypageMealDiaryListFragment", "식단 기록 조회 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "서버 연결 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+        }
+    }
+
+    private fun MealDiaryTodayResponse.toMealDiaryItem(): MealDiaryItem {
+        return MealDiaryItem(
+            mealDiaryId = mealDiaryId,
+            petId = petId,
+            time = mealTime.take(5),
+            preferenceCount = satisfaction.toPreferenceCount(),
+            status = mealStatus.toMealStatusText(),
+            foodDesc = dietSummary.ifBlank {
+                foods.joinToString(", ") { food ->
+                    food.displayText
+                }
+            },
+            memo = memo.orEmpty(),
+            imageUrl = imageUrl
         )
     }
 
-    private fun getDummyMealDiaryList(petId: Long): List<MealDiaryItem> {
-        return when (petId) {
-            1L -> listOf(
-                MealDiaryItem(
-                    time = "9:00",
-                    status = "다 먹음",
-                    foodDesc = "흑돼지 치즈볼 1개, 닭오돌뼈 10g, 플라그오프 등",
-                    memo = "랑이는 맛있게 먹기는 하는데 설사랑 구토를 하고 있음.",
-                    imageResId = R.drawable.img_meal,
-                    preferenceCount = 4
-                ),
-                MealDiaryItem(
-                    time = "18:00",
-                    status = "남김",
-                    foodDesc = "닭가슴살 20g, 당근 5g, 사료 30g",
-                    memo = "저녁은 조금 남김.",
-                    imageResId = R.drawable.img_meal,
-                    preferenceCount = 3
-                )
-            )
-
-            2L -> listOf(
-                MealDiaryItem(
-                    time = "8:30",
-                    status = "다 먹음",
-                    foodDesc = "연어 큐브 2개, 사료 25g",
-                    memo = "우동이는 연어를 좋아함.",
-                    imageResId = R.drawable.img_meal,
-                    preferenceCount = 5
-                )
-            )
-
-            3L -> listOf(
-                MealDiaryItem(
-                    time = "10:00",
-                    status = "조금 먹음",
-                    foodDesc = "오리 고기 15g, 사료 20g",
-                    memo = "초코는 입맛이 별로 없어 보임.",
-                    imageResId = R.drawable.img_meal,
-                    preferenceCount = 2
-                )
-            )
-
-            4L -> listOf(
-                MealDiaryItem(
-                    time = "7:50",
-                    status = "다 먹음",
-                    foodDesc = "소고기 큐브 1개, 브로콜리 5g",
-                    memo = "보리는 빠르게 다 먹음.",
-                    imageResId = R.drawable.img_meal,
-                    preferenceCount = 4
-                )
-            )
-
-            else -> emptyList()
+    private fun String.toPreferenceCount(): Int {
+        return when (this) {
+            "VERY_BAD" -> 1
+            "BAD" -> 2
+            "NORMAL" -> 3
+            "GOOD" -> 4
+            "VERY_GOOD" -> 5
+            else -> 0
         }
+    }
+
+    private fun String.toMealStatusText(): String {
+        return when (this) {
+            "FINISHED" -> "다 먹음"
+            "LEFT" -> "남김"
+            "SKIPPED" -> "안 먹음"
+            else -> this
+        }
+    }
+
+    private fun moveToDiaryFragment(mealDiary: MealDiaryItem) {
+        parentFragmentManager.beginTransaction()
+            .replace(
+                R.id.fragment_container,
+                DiaryFragment.newInstance(
+                    mode = DiaryMode.READ,
+                    petId = mealDiary.petId,
+                    mealDiaryId = mealDiary.mealDiaryId,
+                    mealTime = mealDiary.time,
+                    mealContent = mealDiary.foodDesc
+                )
+            )
+            .addToBackStack(null)
+            .commit()
     }
 
     inner class DayViewContainer(
@@ -310,13 +386,11 @@ class MypageMealDiaryListFragment : Fragment() {
 
             mypageMealDiaryCalendarPrevIv.setOnClickListener {
                 val previousMonth = month.yearMonth.minusMonths(1)
-
                 binding.mypageMealDiaryCalendarView.smoothScrollToMonth(previousMonth)
             }
 
             mypageMealDiaryCalendarNextIv.setOnClickListener {
                 val nextMonth = month.yearMonth.plusMonths(1)
-
                 binding.mypageMealDiaryCalendarView.smoothScrollToMonth(nextMonth)
             }
         }

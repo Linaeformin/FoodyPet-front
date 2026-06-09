@@ -1,10 +1,12 @@
 package com.example.foodypet.home.model
 
 data class MealDiaryItem(
+    val mealDiaryId: Long,
+    val petId: Long,
     val time: String,
-    val preferenceCount: Int,   // 0~5
+    val preferenceCount: Int,
     val status: String,
     val foodDesc: String,
     val memo: String,
-    val imageResId: Int
+    val imageUrl: String?
 )
