@@ -1,5 +1,8 @@
 package com.example.foodypet.network
 
+import com.example.foodypet.community.dto.ConnectMealTimeResponse
+import com.example.foodypet.community.dto.ConnectMealTimesRequest
+import com.example.foodypet.community.dto.ConnectMealTimesResponse
 import com.example.foodypet.data.auth.LoginRequest
 import com.example.foodypet.data.auth.RefreshTokenRequest
 import com.example.foodypet.data.auth.TokenResponse
@@ -147,4 +150,9 @@ interface ApiService {
     suspend fun getMealDiaryDetail(
         @Path("diaryId") diaryId: Long
     ): Response<MealDiaryDetailResponse>
+
+    @POST("api/community/connect-meals/times")
+    suspend fun getConnectMealTimes(
+        @Body request: ConnectMealTimesRequest
+    ): Response<List<ConnectMealTimeResponse>>
 }

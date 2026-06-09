@@ -25,9 +25,13 @@ import com.example.foodypet.home.model.PetPagerItem
 import com.example.foodypet.network.RetrofitClient
 import com.example.foodypet.stock.fragment.StockFragment
 import kotlinx.coroutines.launch
+import androidx.fragment.app.activityViewModels
+import com.example.foodypet.community.model.ConnectMealPetItem
+import com.example.foodypet.community.viewmodel.CommunityPostSharedViewModel
 
 class HomeFragment : Fragment() {
 
+    private val communityPostSharedViewModel: CommunityPostSharedViewModel by activityViewModels()
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
@@ -90,6 +94,15 @@ class HomeFragment : Fragment() {
                         petList = body.pets.map { pet ->
                             pet.toPetPagerItem()
                         }
+
+                        communityPostSharedViewModel.setPetItems(
+                            petList.map { pet ->
+                                ConnectMealPetItem(
+                                    petId = pet.petId,
+                                    petName = pet.name
+                                )
+                            }
+                        )
 
                         updateHomeWithPetList()
                     } else {
@@ -156,6 +169,8 @@ class HomeFragment : Fragment() {
         ).show()
 
         petList = emptyList()
+        communityPostSharedViewModel.clearPetItems()
+
         updatePetLockUI(false)
         updatePetSection(emptyList())
         updatePetName(null)

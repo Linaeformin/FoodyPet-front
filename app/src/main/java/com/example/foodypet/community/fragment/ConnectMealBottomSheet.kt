@@ -1,33 +1,44 @@
 package com.example.foodypet.community.fragment
 
 import android.app.Dialog
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.FrameLayout
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.example.foodypet.R
+import com.example.foodypet.community.dto.ConnectMealTimesRequest
+import com.example.foodypet.community.model.ConnectMealPetItem
 import com.example.foodypet.databinding.BottomSheetConnectMealBinding
+import com.example.foodypet.network.RetrofitClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.datepicker.MaterialDatePicker
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import android.content.Context
-import android.content.res.Configuration
 
 class ConnectMealBottomSheet(
+    private val petItems: List<ConnectMealPetItem>,
     private val onMealConnected: () -> Unit
 ) : BottomSheetDialogFragment() {
 
     private var _binding: BottomSheetConnectMealBinding? = null
     private val binding get() = _binding!!
 
-    private val petNames = listOf("랑이", "초코", "보리")
-    private val feedTimes = listOf("8:00", "12:00", "18:00")
+    private var selectedPetId: Long = -1L
+    private var selectedMealDate: String? = null
+    private var selectedFeedTime: String? = null
+
+    private var feedTimes: List<String> = emptyList()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return BottomSheetDialog(requireContext(), theme).apply {
@@ -66,20 +77,30 @@ class ConnectMealBottomSheet(
 
         setupInitialView()
         setupPetNameDropdown()
-        setupFeedTimeDropdown()
         setupClickListeners()
     }
 
     private fun setupInitialView() {
-        // 조회하기 누르기 전에는 식단 결과 숨김
         binding.layoutConnectedMealResult.visibility = View.INVISIBLE
 
-        // 임시 기본값
-        binding.petNameDropdownActv.setText("랑이", false)
-        binding.feedTimeDropdownActv.setText("18:00", false)
+        binding.feedTimeDropdownActv.setText("", false)
+        binding.feedTimeDropdownActv.hint = "선택"
+        binding.feedTimeDropdownActv.isEnabled = false
+
+        if (petItems.isNotEmpty()) {
+            val firstPet = petItems.first()
+            selectedPetId = firstPet.petId
+            binding.petNameDropdownActv.setText(firstPet.petName, false)
+        } else {
+            selectedPetId = -1L
+            binding.petNameDropdownActv.setText("", false)
+            Toast.makeText(requireContext(), "등록된 반려동물이 없습니다.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupPetNameDropdown() {
+        val petNames = petItems.map { it.petName }
+
         val petNameAdapter = ArrayAdapter(
             requireContext(),
             R.layout.item_unit_dropdown,
@@ -93,14 +114,48 @@ class ConnectMealBottomSheet(
         }
 
         binding.petNameDropdownActv.setOnItemClickListener { _, _, position, _ ->
-            val selectedPetName = petNames[position]
-            binding.petNameDropdownActv.setText(selectedPetName, false)
+            val selectedPet = petItems[position]
 
-            // TODO: 이름 선택 시 급여일 조회 기능 연결
+            selectedPetId = selectedPet.petId
+            binding.petNameDropdownActv.setText(selectedPet.petName, false)
+
+            clearFeedTimes()
+            binding.layoutConnectedMealResult.visibility = View.INVISIBLE
+
+            if (!selectedMealDate.isNullOrBlank()) {
+                loadFeedTimes()
+            }
         }
     }
 
-    private fun setupFeedTimeDropdown() {
+    private fun loadMealPreview() {
+        if (selectedPetId == -1L) {
+            Toast.makeText(requireContext(), "반려동물을 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (selectedMealDate.isNullOrBlank()) {
+            Toast.makeText(requireContext(), "급여일을 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (selectedFeedTime.isNullOrBlank()) {
+            Toast.makeText(requireContext(), "급여 시간을 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // TODO: 식단 미리보기 API 연결
+        // POST /api/community/connect-meals/preview
+        // selectedPetId, selectedMealDate, selectedFeedTime 사용
+
+        showMealResult(
+            mealDescription = "흑돼지 치즈볼 1개, 닭오돌뼈 10g, 플라그오프, 아가스틴 슈퍼부스트, 뉴로액트, 도란도란 단호박"
+        )
+    }
+
+    private fun setupFeedTimeDropdown(times: List<String>) {
+        feedTimes = times
+
         val feedTimeAdapter = ArrayAdapter(
             requireContext(),
             R.layout.item_unit_dropdown,
@@ -109,13 +164,29 @@ class ConnectMealBottomSheet(
 
         binding.feedTimeDropdownActv.setAdapter(feedTimeAdapter)
 
+        binding.feedTimeDropdownActv.isEnabled = feedTimes.isNotEmpty()
+
+        if (feedTimes.isNotEmpty()) {
+            selectedFeedTime = feedTimes.first()
+            binding.feedTimeDropdownActv.setText(feedTimes.first(), false)
+        } else {
+            selectedFeedTime = null
+            binding.feedTimeDropdownActv.setText("", false)
+            binding.feedTimeDropdownActv.hint = "없음"
+        }
+
         binding.feedTimeDropdownActv.setOnClickListener {
-            binding.feedTimeDropdownActv.showDropDown()
+            if (feedTimes.isNotEmpty()) {
+                binding.feedTimeDropdownActv.showDropDown()
+            }
         }
 
         binding.feedTimeDropdownActv.setOnItemClickListener { _, _, position, _ ->
-            val selectedFeedTime = feedTimes[position]
-            binding.feedTimeDropdownActv.setText(selectedFeedTime, false)
+            val selectedTime = feedTimes[position]
+
+            selectedFeedTime = selectedTime
+            binding.feedTimeDropdownActv.setText(selectedTime, false)
+            binding.layoutConnectedMealResult.visibility = View.INVISIBLE
         }
     }
 
@@ -125,28 +196,139 @@ class ConnectMealBottomSheet(
         }
 
         binding.btnSearchMeal.setOnClickListener {
-            val selectedPetName = binding.petNameDropdownActv.text.toString()
-            val selectedFeedDate = binding.tvSelectedFeedDate.text.toString()
-            val selectedFeedTime = binding.feedTimeDropdownActv.text.toString()
-
-            // TODO: selectedPetName, selectedFeedDate, selectedFeedTime 기준으로 식단 조회 API 연결
-
-            showMealResult(
-                mealDescription = "흑돼지 치즈볼 1개, 닭오돌뼈 10g, 플라그오프, 아가스틴 슈퍼부스트, 뉴로액트, 도란도란 단호박"
-            )
+            loadMealPreview()
         }
 
         binding.btnConnectMeal.setOnClickListener {
-            // TODO: 식단 연결 API 연결
+            if (selectedPetId == -1L) {
+                Toast.makeText(requireContext(), "반려동물을 선택해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-            // TODO: 서버 응답 성공 시 아래 코드 실행
+            if (selectedMealDate.isNullOrBlank()) {
+                Toast.makeText(requireContext(), "급여일을 선택해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (selectedFeedTime.isNullOrBlank()) {
+                Toast.makeText(requireContext(), "급여 시간을 선택해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // TODO: 식단 연결 API 연결
             onMealConnected()
             dismiss()
         }
     }
 
+    private fun loadFeedTimes() {
+        if (selectedPetId == -1L) {
+            Toast.makeText(requireContext(), "반려동물을 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val mealDate = selectedMealDate
+
+        if (mealDate.isNullOrBlank()) {
+            Toast.makeText(requireContext(), "급여일을 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        lifecycleScope.launch {
+            try {
+                binding.btnSearchMeal.isEnabled = false
+
+                Log.d(
+                    "ConnectMealBottomSheet",
+                    "급여 시각 조회 요청 petId=$selectedPetId, mealDate=$mealDate"
+                )
+
+                val response = RetrofitClient.apiService.getConnectMealTimes(
+                    ConnectMealTimesRequest(
+                        petId = selectedPetId,
+                        mealDate = mealDate
+                    )
+                )
+
+                Log.d(
+                    "ConnectMealBottomSheet",
+                    "급여 시각 조회 응답 code=${response.code()}, isSuccessful=${response.isSuccessful}"
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    Log.d(
+                        "ConnectMealBottomSheet",
+                        "급여 시각 조회 body=$body"
+                    )
+
+                    if (body != null) {
+                        val mealTimes = body.map { item ->
+                            item.mealTime.take(5)
+                        }
+
+                        setupFeedTimeDropdown(mealTimes)
+
+                        if (mealTimes.isEmpty()) {
+                            Toast.makeText(
+                                requireContext(),
+                                "해당 날짜의 급여 시간이 없습니다.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            binding.layoutConnectedMealResult.visibility = View.INVISIBLE
+                        }
+                    } else {
+                        clearFeedTimes()
+                        Toast.makeText(
+                            requireContext(),
+                            "급여 시간 응답이 비어 있습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+
+                    Log.e(
+                        "ConnectMealBottomSheet",
+                        "급여 시각 조회 실패 code=${response.code()}, errorBody=$errorBody"
+                    )
+
+                    clearFeedTimes()
+                    Toast.makeText(
+                        requireContext(),
+                        "급여 시간 조회에 실패했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Log.e("ConnectMealBottomSheet", "급여 시각 조회 통신 오류", e)
+
+                clearFeedTimes()
+                Toast.makeText(
+                    requireContext(),
+                    "서버와 통신 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } finally {
+                binding.btnSearchMeal.isEnabled = true
+            }
+        }
+    }
+
+    private fun clearFeedTimes() {
+        feedTimes = emptyList()
+        selectedFeedTime = null
+
+        binding.feedTimeDropdownActv.setAdapter(null)
+        binding.feedTimeDropdownActv.setText("", false)
+        binding.feedTimeDropdownActv.hint = "선택"
+        binding.feedTimeDropdownActv.isEnabled = false
+    }
+
     private fun showFeedDatePicker() {
-        val koreanContext = getKoreanContext()
+        getKoreanContext()
 
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setTheme(R.style.ThemeOverlay_FoodyPet_MaterialDatePicker)
@@ -157,15 +339,25 @@ class ConnectMealBottomSheet(
             .build()
 
         datePicker.addOnPositiveButtonClickListener { selectedDate ->
-            val dateFormat = SimpleDateFormat("yyyy.MM.dd", Locale.KOREA)
-            val formattedDate = dateFormat.format(Date(selectedDate))
+            val displayDateFormat = SimpleDateFormat("yyyy.MM.dd", Locale.KOREA)
+            val apiDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.KOREA)
 
-            binding.tvSelectedFeedDate.text = formattedDate
+            val date = Date(selectedDate)
+
+            val displayDate = displayDateFormat.format(date)
+            val apiDate = apiDateFormat.format(date)
+
+            selectedMealDate = apiDate
+
+            binding.tvSelectedFeedDate.text = displayDate
             binding.tvSelectedFeedDate.setTextColor(
                 requireContext().getColor(R.color.black)
             )
 
+            clearFeedTimes()
             binding.layoutConnectedMealResult.visibility = View.INVISIBLE
+
+            loadFeedTimes()
         }
 
         datePicker.show(parentFragmentManager, "FeedDatePicker")
@@ -184,10 +376,6 @@ class ConnectMealBottomSheet(
     private fun showMealResult(mealDescription: String) {
         binding.layoutConnectedMealResult.visibility = View.VISIBLE
         binding.tvMealDescription.text = mealDescription
-
-        // XML에 iv_meal_image src="@drawable/img_meal" 넣어둔 상태라
-        // 임시 이미지는 그대로 보임.
-        // 나중에 서버 이미지 연결하면 여기서 Glide로 넣으면 됨.
     }
 
     override fun onDestroyView() {
