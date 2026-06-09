@@ -13,6 +13,9 @@ import com.example.foodypet.databinding.FragmentMealEditorBinding
 import com.example.foodypet.home.adapter.MealPagerAdapter
 import com.example.foodypet.home.model.FoodUiModel
 import com.example.foodypet.home.model.MealPageUiModel
+import androidx.lifecycle.lifecycleScope
+import com.example.foodypet.home.dto.SnackAutocompleteResponse
+import com.example.foodypet.network.RetrofitClient
 
 class MealEditorFragment : Fragment(R.layout.fragment_meal_editor) {
 
@@ -116,7 +119,10 @@ class MealEditorFragment : Fragment(R.layout.fragment_meal_editor) {
 
         binding.mealViewPager.adapter = MealPagerAdapter(
             pages = pages,
-            inventoryItems = dummyInventory,
+            lifecycleScope = viewLifecycleOwner.lifecycleScope,
+            searchSnack = { keyword ->
+                searchSnackAutocomplete(keyword)
+            },
             isTimeMode = isTimeMode
         )
 
@@ -127,6 +133,18 @@ class MealEditorFragment : Fragment(R.layout.fragment_meal_editor) {
         currentPage = safePosition
         updateIndicator(safePosition)
         updateBottomButtonText(safePosition)
+    }
+
+    private suspend fun searchSnackAutocomplete(
+        keyword: String
+    ): List<SnackAutocompleteResponse> {
+        val response = RetrofitClient.apiService.searchSnackAutocomplete(keyword)
+
+        return if (response.isSuccessful) {
+            response.body().orEmpty()
+        } else {
+            emptyList()
+        }
     }
 
     private fun updateBottomButtonText(position: Int) {
@@ -203,13 +221,12 @@ class MealEditorFragment : Fragment(R.layout.fragment_meal_editor) {
 
     private fun dummyFoods(): List<FoodUiModel> {
         return listOf(
-            FoodUiModel("닭오돌뼈", "10", "g"),
-            FoodUiModel("흑돼지 치즈볼", "1", "개"),
-            FoodUiModel("플라그오프", "1", "봉"),
-            FoodUiModel("어거스틴 슈퍼부스트", "10", "ml"),
-            FoodUiModel("뉴로액트", "10", "g"),
-            FoodUiModel("도란도", "10", "g"),
-            FoodUiModel("", "", "g")
+            FoodUiModel(1, "닭오돌뼈", "10", "g"),
+            FoodUiModel(2, "흑돼지 치즈볼", "1", "개"),
+            FoodUiModel(3, "플라그오프", "1", "봉"),
+            FoodUiModel(4, "어거스틴 슈퍼부스트", "10", "ml"),
+            FoodUiModel(5, "뉴로액트", "10", "g"),
+            FoodUiModel(6, "도란도", "10", "g")
         )
     }
 

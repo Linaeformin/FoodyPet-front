@@ -450,7 +450,15 @@ class HomeFragment : Fragment() {
 
     private fun popupSnack() {
         binding.homeFoodDiarySnackCv.setOnClickListener {
-            val dialog = SnackDialogFragment()
+            if (petList.isEmpty()) {
+                Toast.makeText(requireContext(), "반려동물 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val currentPet = petList[currentPetPosition]
+            val petId = currentPet.petId
+
+            val dialog = SnackDialogFragment.newInstance(petId)
             dialog.show(parentFragmentManager, "SnackDialog")
         }
     }

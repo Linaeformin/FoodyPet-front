@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodypet.databinding.DialogPopupSnackBinding
@@ -13,6 +14,12 @@ import com.example.foodypet.databinding.ItemMealBinding
 import com.example.foodypet.home.adapter.FoodRowAdapter
 import com.example.foodypet.home.model.FoodUiModel
 import com.example.foodypet.home.model.MealItem
+import com.example.foodypet.home.dto.SnackAutocompleteResponse
+import com.example.foodypet.network.RetrofitClient
+import com.example.foodypet.home.dto.PetTreatDiaryCreateRequest
+import com.example.foodypet.home.dto.TreatDiaryCreateItemRequest
+import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 class SnackDialogFragment : DialogFragment() {
 
@@ -22,6 +29,8 @@ class SnackDialogFragment : DialogFragment() {
     private lateinit var foodRowAdapter: FoodRowAdapter
     private lateinit var historyAdapter: SnackHistoryAdapter
 
+    private var nextTreatRound: Int = 1
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -29,49 +38,6 @@ class SnackDialogFragment : DialogFragment() {
     ): View {
         _binding = DialogPopupSnackBinding.inflate(inflater, container, false)
         return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        initHeader()
-        initSnackHistory()
-        initSnackRegister()
-        initClickListeners()
-    }
-
-    private fun initHeader() {
-        binding.pageTitleChipTv.text = "4회"
-    }
-
-    private fun initSnackHistory() {
-        val historyList = listOf(
-            MealItem(
-                mealId = 1L,
-                time = "1회",
-                content = "너티 강아지 고양이 츄르 하루루틴 굿모닝 퓨레 1개",
-                isFed = true
-            ),
-            MealItem(
-                mealId = 2L,
-                time = "2회",
-                content = "도란도란 단호박 10g",
-                isFed = true
-            ),
-            MealItem(
-                mealId = 3L,
-                time = "3회",
-                content = "닭오돌뼈 10g, 도란도란 우유 20ml",
-                isFed = true
-            )
-        )
-
-        historyAdapter = SnackHistoryAdapter(historyList)
-
-        binding.snackHistoryRv.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = historyAdapter
-        }
     }
 
     override fun onStart() {
@@ -84,30 +50,119 @@ class SnackDialogFragment : DialogFragment() {
         )
     }
 
-    private fun initSnackRegister() {
-        val inventoryItems = listOf(
-            "닭오돌뼈",
-            "도란도란 단호박",
-            "도란도란",
-            "도란도란 우유",
-            "너티 강아지 고양이 츄르 하루루틴 굿모닝 퓨레"
-        )
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
+        initHeader()
+        initSnackHistory()
+        initSnackRegister()
+        initClickListeners()
+    }
+
+    private fun initHeader() {
+        binding.pageTitleChipTv.text = "${nextTreatRound}회"
+    }
+
+    private fun initSnackHistory() {
+        historyAdapter = SnackHistoryAdapter(mutableListOf())
+
+        binding.snackHistoryRv.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = historyAdapter
+        }
+
+        loadTodayTreatDiaries()
+    }
+
+    private fun getPetId(): Long {
+        return arguments?.getLong(ARG_PET_ID, -1L) ?: -1L
+    }
+
+    private fun loadTodayTreatDiaries() {
+        val petId = getPetId()
+
+        if (petId <= 0L) {
+            Toast.makeText(
+                requireContext(),
+                "반려동물 정보를 찾을 수 없습니다.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getTodayTreatDiaries(petId)
+
+                if (response.isSuccessful) {
+                    val treatDiaries = response.body().orEmpty()
+
+                    nextTreatRound = treatDiaries.size + 1
+                    binding.pageTitleChipTv.text = "${nextTreatRound}회"
+
+                    val historyItems = treatDiaries.map { diary ->
+                        MealItem(
+                            mealId = diary.treatRound.toLong(),
+                            time = "${diary.treatRound}회",
+                            content = diary.items.joinToString(", ") { item ->
+                                "${item.foodName} ${formatAmount(item.amount)}${item.unitLabel}"
+                            },
+                            isFed = true
+                        )
+                    }
+
+                    historyAdapter.submitItems(historyItems)
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "간식 기록을 불러오지 못했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "서버와 통신할 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun formatAmount(amount: BigDecimal): String {
+        return amount.stripTrailingZeros().toPlainString()
+    }
+    private fun initSnackRegister() {
         val foodItems = mutableListOf(
-            FoodUiModel(name = "", amount = "10", unit = "g"),
-            FoodUiModel(name = "", amount = "10", unit = "g"),
-            FoodUiModel(name = "", amount = "", unit = "g"),
-            FoodUiModel(name = "", amount = "", unit = "g")
+            FoodUiModel(unit = "GRAM", unitLabel = "g"),
+            FoodUiModel(unit = "GRAM", unitLabel = "g"),
+            FoodUiModel(unit = "GRAM", unitLabel = "g"),
+            FoodUiModel(unit = "GRAM", unitLabel = "g")
         )
 
         foodRowAdapter = FoodRowAdapter(
             items = foodItems,
-            inventoryItems = inventoryItems
+            lifecycleScope = viewLifecycleOwner.lifecycleScope,
+            searchSnack = { keyword ->
+                searchSnackAutocomplete(keyword)
+            }
         )
 
         binding.foodRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = foodRowAdapter
+        }
+    }
+
+    private suspend fun searchSnackAutocomplete(
+        keyword: String
+    ): List<SnackAutocompleteResponse> {
+        val response = RetrofitClient.apiService.searchSnackAutocomplete(keyword)
+
+        return if (response.isSuccessful) {
+            response.body().orEmpty()
+        } else {
+            emptyList()
         }
     }
 
@@ -117,32 +172,100 @@ class SnackDialogFragment : DialogFragment() {
         }
 
         binding.snackSaveBtn.setOnClickListener {
-            val result = getCurrentFoodItems()
-
-            Toast.makeText(
-                requireContext(),
-                "간식 ${result.size}건 저장",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            // TODO:
-            // 여기서 서버 전송 / ViewModel 저장 / 부모 Fragment로 데이터 전달
-            dismiss()
+            createTreatDiary()
         }
     }
 
-    private fun getCurrentFoodItems(): List<FoodUiModel> {
-        val currentList = mutableListOf<FoodUiModel>()
+    private fun createTreatDiary() {
+        val petId = arguments?.getLong(ARG_PET_ID, -1L) ?: -1L
 
-        for (i in 0 until foodRowAdapter.itemCount) {
-            val item = (binding.foodRecyclerView.adapter as FoodRowAdapter)
-            // 현재 어댑터 내부 리스트를 직접 꺼내는 함수 없어서
-            // 아래처럼 별도 관리가 더 좋음
+        if (petId <= 0L) {
+            Toast.makeText(requireContext(), "반려동물 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        // 지금 FoodRowAdapter 구조상 외부에서 items 직접 접근이 안 되니까
-        // 실무에선 adapter에 getItems() 추가하는 게 제일 깔끔함
-        return emptyList()
+        val request = try {
+            buildTreatDiaryCreateRequest()
+        } catch (e: IllegalArgumentException) {
+            Toast.makeText(requireContext(), e.message, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.snackSaveBtn.isEnabled = false
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.createTreatDiary(
+                    petId = petId,
+                    request = request
+                )
+
+                if (response.isSuccessful) {
+                    Toast.makeText(
+                        requireContext(),
+                        response.body()?.message ?: "성공적으로 처리되었습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    dismiss()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "간식 등록에 실패했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "서버와 통신할 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } finally {
+                binding.snackSaveBtn.isEnabled = true
+            }
+        }
+    }
+
+    private fun buildTreatDiaryCreateRequest(): PetTreatDiaryCreateRequest {
+        val selectedItems = foodRowAdapter.getItems()
+            .filter { item ->
+                item.name.isNotBlank() || item.amount.isNotBlank()
+            }
+
+        if (selectedItems.isEmpty()) {
+            throw IllegalArgumentException("등록할 간식을 1개 이상 입력해야 합니다.")
+        }
+
+        val requestItems = selectedItems.map { item ->
+            val stockId = item.stockId
+                ?: throw IllegalArgumentException("간식은 자동완성 목록에서 선택해야 합니다.")
+
+            val amount = item.amount.toBigDecimalOrNull()
+                ?: throw IllegalArgumentException("간식 급여량을 올바르게 입력해야 합니다.")
+
+            if (amount <= BigDecimal.ZERO) {
+                throw IllegalArgumentException("간식 급여량은 0보다 커야 합니다.")
+            }
+
+            TreatDiaryCreateItemRequest(
+                stockId = stockId,
+                amount = amount,
+                unit = item.unit
+            )
+        }
+
+        return PetTreatDiaryCreateRequest(
+            treatRound = nextTreatRound,
+            items = requestItems
+        )
+    }
+
+    private fun getCurrentFoodItems(): List<FoodUiModel> {
+        return foodRowAdapter.getItems()
+            .filter { item ->
+                item.name.isNotBlank() && item.amount.isNotBlank()
+            }
     }
 
     override fun onDestroyView() {
@@ -150,11 +273,8 @@ class SnackDialogFragment : DialogFragment() {
         _binding = null
     }
 
-    /**
-     * 이전 기록용 간단 어댑터
-     */
     private class SnackHistoryAdapter(
-        private val items: List<MealItem>
+        private val items: MutableList<MealItem>
     ) : RecyclerView.Adapter<SnackHistoryAdapter.SnackHistoryViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SnackHistoryViewHolder {
@@ -169,6 +289,12 @@ class SnackDialogFragment : DialogFragment() {
 
         override fun getItemCount(): Int = items.size
 
+        fun submitItems(newItems: List<MealItem>) {
+            items.clear()
+            items.addAll(newItems)
+            notifyDataSetChanged()
+        }
+
         class SnackHistoryViewHolder(
             private val binding: ItemMealBinding
         ) : RecyclerView.ViewHolder(binding.root) {
@@ -176,6 +302,18 @@ class SnackDialogFragment : DialogFragment() {
             fun bind(item: MealItem) {
                 binding.quickMealTimeTv.text = item.time
                 binding.quickMealContentTv.text = item.content
+            }
+        }
+    }
+
+    companion object {
+        private const val ARG_PET_ID = "pet_id"
+
+        fun newInstance(petId: Long): SnackDialogFragment {
+            return SnackDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putLong(ARG_PET_ID, petId)
+                }
             }
         }
     }

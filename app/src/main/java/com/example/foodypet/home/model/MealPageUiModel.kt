@@ -6,7 +6,9 @@ data class MealPageUiModel(
 )
 
 data class FoodUiModel(
-    var name: String,
-    var amount: String,
-    var unit: String
+    var stockId: Long? = null,
+    var name: String = "",
+    var amount: String = "",
+    var unit: String = "GRAM",
+    var unitLabel: String = "g"
 )

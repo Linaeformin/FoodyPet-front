@@ -5,11 +5,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodypet.databinding.ItemMealPageBinding
+import com.example.foodypet.home.dto.SnackAutocompleteResponse
 import com.example.foodypet.home.model.MealPageUiModel
+import kotlinx.coroutines.CoroutineScope
 
 class MealPagerAdapter(
     private val pages: List<MealPageUiModel>,
-    private val inventoryItems: List<String>,
+    private val lifecycleScope: CoroutineScope,
+    private val searchSnack: suspend (String) -> List<SnackAutocompleteResponse>,
     private val isTimeMode: Boolean
 ) : RecyclerView.Adapter<MealPagerAdapter.MealPageViewHolder>() {
 
@@ -24,9 +27,11 @@ class MealPagerAdapter(
                 binding.foodRecyclerView.layoutManager = LinearLayoutManager(binding.root.context)
                 binding.foodRecyclerView.itemAnimator = null
                 binding.foodRecyclerView.isNestedScrollingEnabled = false
+
                 binding.foodRecyclerView.adapter = FoodRowAdapter(
                     items = page.foods.toMutableList(),
-                    inventoryItems = inventoryItems
+                    lifecycleScope = lifecycleScope,
+                    searchSnack = searchSnack
                 )
             }
         }

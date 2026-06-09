@@ -11,6 +11,7 @@ import com.example.foodypet.home.dto.DietRecommendRequest
 import com.example.foodypet.home.dto.DietRecommendResponse
 import com.example.foodypet.home.dto.HomeTodayResponse
 import com.example.foodypet.home.dto.MealWriteFormResponse
+import com.example.foodypet.home.dto.PetTreatDiaryCreateRequest
 import com.example.foodypet.home.dto.WaterIntakeCreateRequest
 import com.example.foodypet.home.dto.WaterIntakeResponse
 import com.example.foodypet.stock.dto.AssignFoodStockRequest
@@ -29,6 +30,8 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
+import com.example.foodypet.home.dto.SnackAutocompleteResponse
+import com.example.foodypet.home.dto.TreatDiaryTodayResponse
 
 interface ApiService {
 
@@ -117,4 +120,19 @@ interface ApiService {
         @Path("petId") petId: Long
     ): Response<WaterIntakeResponse>
 
+    @GET("api/treat-diaries/autocomplete")
+    suspend fun searchSnackAutocomplete(
+        @Query("keyword") keyword: String
+    ): Response<List<SnackAutocompleteResponse>>
+
+    @POST("api/pets/{petId}/treat-diaries")
+    suspend fun createTreatDiary(
+        @Path("petId") petId: Long,
+        @Body request: PetTreatDiaryCreateRequest
+    ): Response<CommonResponse>
+
+    @GET("api/pets/{petId}/treat-diaries/today")
+    suspend fun getTodayTreatDiaries(
+        @Path("petId") petId: Long
+    ): Response<List<TreatDiaryTodayResponse>>
 }
