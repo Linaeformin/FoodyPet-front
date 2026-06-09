@@ -15,15 +15,16 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.foodypet.R
 import com.example.foodypet.databinding.FragmentHomeBinding
 import com.example.foodypet.home.adapter.HomePetPagerAdapter
+import com.example.foodypet.home.dto.CapsuleIntakeCreateItem
+import com.example.foodypet.home.dto.CapsuleIntakeCreateRequest
 import com.example.foodypet.home.dto.HomePetTodayResponse
+import com.example.foodypet.home.dto.WaterIntakeCreateRequest
 import com.example.foodypet.home.enum.DiaryMode
 import com.example.foodypet.home.model.NutritionUiModel
 import com.example.foodypet.home.model.PetPagerItem
 import com.example.foodypet.network.RetrofitClient
 import com.example.foodypet.stock.fragment.StockFragment
 import kotlinx.coroutines.launch
-import com.example.foodypet.home.dto.CapsuleIntakeCreateItem
-import com.example.foodypet.home.dto.CapsuleIntakeCreateRequest
 
 class HomeFragment : Fragment() {
 
@@ -456,15 +457,153 @@ class HomeFragment : Fragment() {
 
     private fun popupWater() {
         binding.homeFoodDiaryWaterCv.setOnClickListener {
-            val dialog = WaterAmountDialog(requireContext()) { totalAmount, inputValues ->
-
-                binding.homeFoodDiaryWaterTv.text = "${totalAmount}ml"
-
-                // TODO: 서버 저장이나 ViewModel 저장 필요하면 여기서 처리
-                // viewModel.saveWaterAmount(totalAmount, inputValues)
+            if (petList.isEmpty()) {
+                Toast.makeText(
+                    requireContext(),
+                    "등록된 반려동물이 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
             }
 
-            dialog.show()
+            if (currentPetPosition !in petList.indices) {
+                Toast.makeText(
+                    requireContext(),
+                    "반려동물 정보를 확인할 수 없습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            val currentPet = petList[currentPetPosition]
+
+            loadWaterIntakesAndShowDialog(
+                petId = currentPet.petId
+            )
+        }
+    }
+
+    private fun loadWaterIntakesAndShowDialog(petId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getWaterIntakes(petId)
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    val initialValues = body?.waterIntakeItems
+                        ?.map { item ->
+                            item.amountMl.toInt()
+                        }
+                        ?: emptyList()
+
+                    showWaterAmountDialog(
+                        petId = petId,
+                        initialValues = initialValues
+                    )
+
+                } else {
+                    Log.e(
+                        "HomeFragment",
+                        "음수량 조회 실패 code=${response.code()}, error=${response.errorBody()?.string()}"
+                    )
+
+                    showWaterAmountDialog(
+                        petId = petId,
+                        initialValues = emptyList()
+                    )
+                }
+
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "음수량 조회 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "서버 연결 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun showWaterAmountDialog(
+        petId: Long,
+        initialValues: List<Int>
+    ) {
+        var dialog: WaterAmountDialog? = null
+
+        dialog = WaterAmountDialog(
+            context = requireContext(),
+            initialValues = initialValues,
+            onSaveClick = { totalAmount, inputValues ->
+                saveWaterIntakes(
+                    petId = petId,
+                    totalAmount = totalAmount,
+                    inputValues = inputValues,
+                    dialog = dialog
+                )
+            }
+        )
+
+        dialog.show()
+    }
+
+    private fun saveWaterIntakes(
+        petId: Long,
+        totalAmount: Int,
+        inputValues: List<Int>,
+        dialog: WaterAmountDialog?
+    ) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val request = WaterIntakeCreateRequest(
+                    amountsMl = inputValues.map { amount ->
+                        amount.toLong()
+                    }
+                )
+
+                val response = RetrofitClient.apiService.createWaterIntakes(
+                    petId = petId,
+                    request = request
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    Toast.makeText(
+                        requireContext(),
+                        body?.message ?: "성공적으로 처리되었습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    binding.homeFoodDiaryWaterTv.text = "${totalAmount}ml"
+
+                    dialog?.dismiss()
+
+                    loadTodayDiaries()
+
+                } else {
+                    Log.e(
+                        "HomeFragment",
+                        "음수량 기록 저장 실패 code=${response.code()}, error=${response.errorBody()?.string()}"
+                    )
+
+                    Toast.makeText(
+                        requireContext(),
+                        "음수량 기록 저장에 실패했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "음수량 기록 저장 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "서버 연결 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 

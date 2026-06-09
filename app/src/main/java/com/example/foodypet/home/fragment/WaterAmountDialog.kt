@@ -8,16 +8,20 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import com.example.foodypet.R
 
 class WaterAmountDialog(
     context: Context,
+    private val initialValues: List<Int> = emptyList(),
     private val onSaveClick: ((totalAmount: Int, inputValues: List<Int>) -> Unit)? = null
 ) : Dialog(context) {
 
@@ -28,6 +32,7 @@ class WaterAmountDialog(
     private lateinit var saveBtn: TextView
 
     private val inputEditTextList = mutableListOf<EditText>()
+    private val defaultInputRowList = mutableListOf<View>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +44,7 @@ class WaterAmountDialog(
         initWindow()
         initView()
         initDefaultInputs()
+        applyInitialValues()
         initListener()
         updateTotal()
     }
@@ -67,17 +73,65 @@ class WaterAmountDialog(
         val inputEt2 = findViewById<EditText>(R.id.input_et_2)
         val inputEt3 = findViewById<EditText>(R.id.input_et_3)
 
+        inputEditTextList.clear()
+        defaultInputRowList.clear()
+
         inputEditTextList.add(inputEt1)
         inputEditTextList.add(inputEt2)
         inputEditTextList.add(inputEt3)
 
-        inputEt1.setText("200")
-        inputEt2.setText("300")
-        inputEt3.setText("100")
+        defaultInputRowList.add(findViewById(R.id.water_input_row_1))
+        defaultInputRowList.add(findViewById(R.id.water_input_row_2))
+        defaultInputRowList.add(findViewById(R.id.water_input_row_3))
+
+        inputEt1.setText("")
+        inputEt2.setText("")
+        inputEt3.setText("")
 
         addTextWatcher(inputEt1)
         addTextWatcher(inputEt2)
         addTextWatcher(inputEt3)
+    }
+
+    private fun applyInitialValues() {
+        if (initialValues.isEmpty()) {
+            showDefaultEmptyInputs()
+            updateTotal()
+            return
+        }
+
+        hideAllDefaultInputs()
+
+        initialValues.forEachIndexed { index, amount ->
+            if (index < inputEditTextList.size) {
+                defaultInputRowList[index].visibility = View.VISIBLE
+                inputEditTextList[index].setText(amount.toString())
+            } else {
+                addInputRow(initialAmount = amount)
+            }
+        }
+
+        updateTotal()
+    }
+
+    private fun showDefaultEmptyInputs() {
+        defaultInputRowList.forEach { row ->
+            row.visibility = View.VISIBLE
+        }
+
+        inputEditTextList.forEach { editText ->
+            editText.setText("")
+        }
+    }
+
+    private fun hideAllDefaultInputs() {
+        defaultInputRowList.forEach { row ->
+            row.visibility = View.GONE
+        }
+
+        inputEditTextList.forEach { editText ->
+            editText.setText("")
+        }
     }
 
     private fun initListener() {
@@ -91,34 +145,73 @@ class WaterAmountDialog(
 
         saveBtn.setOnClickListener {
             val values = getInputValues()
+
+            if (values.isEmpty()) {
+                Toast.makeText(context, "음수량을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val total = values.sum()
             onSaveClick?.invoke(total, values)
-            dismiss()
         }
     }
 
-    private fun addInputRow() {
+    private fun addInputRow(initialAmount: Int? = null) {
+        val hiddenDefaultIndex = defaultInputRowList.indexOfFirst { row ->
+            row.visibility == View.GONE
+        }
+
+        if (hiddenDefaultIndex != -1) {
+            val targetRow = defaultInputRowList[hiddenDefaultIndex]
+            val targetEditText = inputEditTextList[hiddenDefaultIndex]
+
+            targetRow.visibility = View.VISIBLE
+            targetEditText.setText(initialAmount?.toString() ?: "")
+
+            if (initialAmount == null) {
+                targetEditText.requestFocus()
+                showKeyboard(targetEditText)
+            }
+
+            updateTotal()
+            return
+        }
+
         val itemView = LayoutInflater.from(context)
             .inflate(R.layout.item_water_input, inputContainerLl, false)
 
         val inputEt = itemView.findViewById<EditText>(R.id.input_et)
 
         inputEt.hint = "100"
-        inputEt.setText("")
+        inputEt.setText(initialAmount?.toString() ?: "")
 
         addTextWatcher(inputEt)
         inputEditTextList.add(inputEt)
         inputContainerLl.addView(itemView)
 
-        inputEt.requestFocus()
+        if (initialAmount == null) {
+            inputEt.requestFocus()
+            showKeyboard(inputEt)
+        }
+
         updateTotal()
     }
 
     private fun addTextWatcher(editText: EditText) {
         editText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) = Unit
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) = Unit
 
             override fun afterTextChanged(s: Editable?) {
                 updateTotal()
@@ -133,12 +226,24 @@ class WaterAmountDialog(
 
     private fun getInputValues(): List<Int> {
         return inputEditTextList.mapNotNull { editText ->
+            val row = editText.parent as? View
+
+            if (row?.visibility == View.GONE) {
+                return@mapNotNull null
+            }
+
             val value = editText.text.toString().trim()
+
             if (value.isBlank()) {
                 null
             } else {
                 value.toIntOrNull()
             }
         }
+    }
+
+    private fun showKeyboard(editText: EditText) {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
     }
 }

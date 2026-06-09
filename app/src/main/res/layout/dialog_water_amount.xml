@@ -43,6 +43,7 @@
 
         <!-- 첫 번째 입력칸 -->
         <FrameLayout
+            android:id="@+id/water_input_row_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp">
@@ -95,6 +96,7 @@
 
         <!-- 두 번째 입력칸 -->
         <FrameLayout
+            android:id="@+id/water_input_row_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp">
@@ -145,6 +147,7 @@
 
         <!-- 세 번째 입력칸 -->
         <FrameLayout
+            android:id="@+id/water_input_row_3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp">

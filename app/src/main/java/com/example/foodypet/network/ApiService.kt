@@ -11,6 +11,8 @@ import com.example.foodypet.home.dto.DietRecommendRequest
 import com.example.foodypet.home.dto.DietRecommendResponse
 import com.example.foodypet.home.dto.HomeTodayResponse
 import com.example.foodypet.home.dto.MealWriteFormResponse
+import com.example.foodypet.home.dto.WaterIntakeCreateRequest
+import com.example.foodypet.home.dto.WaterIntakeResponse
 import com.example.foodypet.stock.dto.AssignFoodStockRequest
 import com.example.foodypet.stock.dto.CommonResponse
 import com.example.foodypet.stock.dto.FoodListResponse
@@ -103,4 +105,16 @@ interface ApiService {
         @Path("petId") petId: Long,
         @Body request: CapsuleIntakeCreateRequest
     ): Response<CommonResponse>
+
+    @POST("api/water/{petId}/water-intakes")
+    suspend fun createWaterIntakes(
+        @Path("petId") petId: Long,
+        @Body request: WaterIntakeCreateRequest
+    ): Response<CommonResponse>
+
+    @GET("api/water/{petId}/water-intakes")
+    suspend fun getWaterIntakes(
+        @Path("petId") petId: Long
+    ): Response<WaterIntakeResponse>
+
 }
