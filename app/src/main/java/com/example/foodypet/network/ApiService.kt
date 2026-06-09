@@ -1,5 +1,6 @@
 package com.example.foodypet.network
 
+import com.example.foodypet.community.dto.CommunityPostCreateResponse
 import com.example.foodypet.community.dto.ConnectMealPreviewRequest
 import com.example.foodypet.community.dto.ConnectMealPreviewResponse
 import com.example.foodypet.community.dto.ConnectMealTimeResponse
@@ -162,4 +163,11 @@ interface ApiService {
     suspend fun getConnectMealPreview(
         @Body request: ConnectMealPreviewRequest
     ): Response<ConnectMealPreviewResponse>
+
+    @Multipart
+    @POST("api/community/posts")
+    suspend fun createCommunityPost(
+        @Part("request") request: RequestBody,
+        @Part image: MultipartBody.Part
+    ): Response<CommunityPostCreateResponse>
 }

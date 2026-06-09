@@ -29,7 +29,7 @@ import java.util.Locale
 
 class ConnectMealBottomSheet(
     private val petItems: List<ConnectMealPetItem>,
-    private val onMealConnected: () -> Unit
+    private val onMealConnected: (mealDiaryId: Long) -> Unit
 ) : BottomSheetDialogFragment() {
 
     private var _binding: BottomSheetConnectMealBinding? = null
@@ -317,7 +317,7 @@ class ConnectMealBottomSheet(
             }
 
             // TODO: 다음 식단 연결 API에서 selectedMealDiaryId, selectedDailyDietId 사용
-            onMealConnected()
+            onMealConnected(selectedMealDiaryId)
             dismiss()
         }
     }
