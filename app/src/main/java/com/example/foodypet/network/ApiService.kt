@@ -1,5 +1,7 @@
 package com.example.foodypet.network
 
+import com.example.foodypet.community.dto.ConnectMealPreviewRequest
+import com.example.foodypet.community.dto.ConnectMealPreviewResponse
 import com.example.foodypet.community.dto.ConnectMealTimeResponse
 import com.example.foodypet.community.dto.ConnectMealTimesRequest
 import com.example.foodypet.community.dto.ConnectMealTimesResponse
@@ -155,4 +157,9 @@ interface ApiService {
     suspend fun getConnectMealTimes(
         @Body request: ConnectMealTimesRequest
     ): Response<List<ConnectMealTimeResponse>>
+
+    @POST("api/community/connect-meals/preview")
+    suspend fun getConnectMealPreview(
+        @Body request: ConnectMealPreviewRequest
+    ): Response<ConnectMealPreviewResponse>
 }

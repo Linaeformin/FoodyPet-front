@@ -13,6 +13,7 @@ import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.foodypet.R
+import com.example.foodypet.community.dto.ConnectMealPreviewRequest
 import com.example.foodypet.community.dto.ConnectMealTimesRequest
 import com.example.foodypet.community.model.ConnectMealPetItem
 import com.example.foodypet.databinding.BottomSheetConnectMealBinding
@@ -39,6 +40,9 @@ class ConnectMealBottomSheet(
     private var selectedFeedTime: String? = null
 
     private var feedTimes: List<String> = emptyList()
+
+    private var selectedMealDiaryId: Long = -1L
+    private var selectedDailyDietId: Long = -1L
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return BottomSheetDialog(requireContext(), theme).apply {
@@ -119,6 +123,7 @@ class ConnectMealBottomSheet(
             selectedPetId = selectedPet.petId
             binding.petNameDropdownActv.setText(selectedPet.petName, false)
 
+            clearSelectedMealPreview()
             clearFeedTimes()
             binding.layoutConnectedMealResult.visibility = View.INVISIBLE
 
@@ -134,23 +139,112 @@ class ConnectMealBottomSheet(
             return
         }
 
-        if (selectedMealDate.isNullOrBlank()) {
+        val mealDate = selectedMealDate
+
+        if (mealDate.isNullOrBlank()) {
             Toast.makeText(requireContext(), "급여일을 선택해주세요.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (selectedFeedTime.isNullOrBlank()) {
+        val feedTime = selectedFeedTime
+
+        if (feedTime.isNullOrBlank()) {
             Toast.makeText(requireContext(), "급여 시간을 선택해주세요.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // TODO: 식단 미리보기 API 연결
-        // POST /api/community/connect-meals/preview
-        // selectedPetId, selectedMealDate, selectedFeedTime 사용
+        lifecycleScope.launch {
+            try {
+                binding.btnSearchMeal.isEnabled = false
 
-        showMealResult(
-            mealDescription = "흑돼지 치즈볼 1개, 닭오돌뼈 10g, 플라그오프, 아가스틴 슈퍼부스트, 뉴로액트, 도란도란 단호박"
-        )
+                Log.d(
+                    "ConnectMealBottomSheet",
+                    "식단 미리보기 요청 petId=$selectedPetId, mealDate=$mealDate, mealTime=$feedTime"
+                )
+
+                val response = RetrofitClient.apiService.getConnectMealPreview(
+                    ConnectMealPreviewRequest(
+                        petId = selectedPetId,
+                        mealDate = mealDate,
+                        mealTime = feedTime
+                    )
+                )
+
+                Log.d(
+                    "ConnectMealBottomSheet",
+                    "식단 미리보기 응답 code=${response.code()}, isSuccessful=${response.isSuccessful}"
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    Log.d(
+                        "ConnectMealBottomSheet",
+                        "식단 미리보기 body=$body"
+                    )
+
+                    if (body != null) {
+                        selectedMealDiaryId = body.mealDiaryId
+                        selectedDailyDietId = body.dailyDietId
+
+                        val mealDescription = body.foods.joinToString(separator = ", ") { food ->
+                            "${food.foodName} ${formatAmount(food.amount)}${convertUnit(food.unit)}"
+                        }
+
+                        if (mealDescription.isBlank()) {
+                            clearSelectedMealPreview()
+                            binding.layoutConnectedMealResult.visibility = View.INVISIBLE
+
+                            Toast.makeText(
+                                requireContext(),
+                                "조회된 식단이 없습니다.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            showMealResult(mealDescription)
+                        }
+                    } else {
+                        clearSelectedMealPreview()
+                        binding.layoutConnectedMealResult.visibility = View.INVISIBLE
+
+                        Toast.makeText(
+                            requireContext(),
+                            "식단 조회 응답이 비어 있습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+
+                    Log.e(
+                        "ConnectMealBottomSheet",
+                        "식단 미리보기 실패 code=${response.code()}, errorBody=$errorBody"
+                    )
+
+                    clearSelectedMealPreview()
+                    binding.layoutConnectedMealResult.visibility = View.INVISIBLE
+
+                    Toast.makeText(
+                        requireContext(),
+                        "식단 조회에 실패했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Log.e("ConnectMealBottomSheet", "식단 미리보기 통신 오류", e)
+
+                clearSelectedMealPreview()
+                binding.layoutConnectedMealResult.visibility = View.INVISIBLE
+
+                Toast.makeText(
+                    requireContext(),
+                    "서버와 통신 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } finally {
+                binding.btnSearchMeal.isEnabled = true
+            }
+        }
     }
 
     private fun setupFeedTimeDropdown(times: List<String>) {
@@ -186,6 +280,8 @@ class ConnectMealBottomSheet(
 
             selectedFeedTime = selectedTime
             binding.feedTimeDropdownActv.setText(selectedTime, false)
+
+            clearSelectedMealPreview()
             binding.layoutConnectedMealResult.visibility = View.INVISIBLE
         }
     }
@@ -215,7 +311,12 @@ class ConnectMealBottomSheet(
                 return@setOnClickListener
             }
 
-            // TODO: 식단 연결 API 연결
+            if (selectedMealDiaryId == -1L || selectedDailyDietId == -1L) {
+                Toast.makeText(requireContext(), "먼저 식단을 조회해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // TODO: 다음 식단 연결 API에서 selectedMealDiaryId, selectedDailyDietId 사용
             onMealConnected()
             dismiss()
         }
@@ -327,6 +428,11 @@ class ConnectMealBottomSheet(
         binding.feedTimeDropdownActv.isEnabled = false
     }
 
+    private fun clearSelectedMealPreview() {
+        selectedMealDiaryId = -1L
+        selectedDailyDietId = -1L
+    }
+
     private fun showFeedDatePicker() {
         getKoreanContext()
 
@@ -354,6 +460,7 @@ class ConnectMealBottomSheet(
                 requireContext().getColor(R.color.black)
             )
 
+            clearSelectedMealPreview()
             clearFeedTimes()
             binding.layoutConnectedMealResult.visibility = View.INVISIBLE
 
@@ -376,6 +483,25 @@ class ConnectMealBottomSheet(
     private fun showMealResult(mealDescription: String) {
         binding.layoutConnectedMealResult.visibility = View.VISIBLE
         binding.tvMealDescription.text = mealDescription
+    }
+
+    private fun formatAmount(amount: Double): String {
+        return if (amount % 1.0 == 0.0) {
+            amount.toInt().toString()
+        } else {
+            String.format(Locale.KOREA, "%.2f", amount)
+        }
+    }
+
+    private fun convertUnit(unit: String): String {
+        return when (unit.uppercase()) {
+            "GRAM" -> "g"
+            "KG" -> "kg"
+            "ML" -> "ml"
+            "L" -> "L"
+            "EA" -> "개"
+            else -> unit
+        }
     }
 
     override fun onDestroyView() {
