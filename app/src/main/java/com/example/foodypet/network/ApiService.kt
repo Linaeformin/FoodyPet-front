@@ -1,6 +1,7 @@
 package com.example.foodypet.network
 
 import com.example.foodypet.community.dto.CommunityPostCreateResponse
+import com.example.foodypet.community.dto.CommunityPostListResponse
 import com.example.foodypet.community.dto.ConnectMealPreviewRequest
 import com.example.foodypet.community.dto.ConnectMealPreviewResponse
 import com.example.foodypet.community.dto.ConnectMealTimeResponse
@@ -170,4 +171,7 @@ interface ApiService {
         @Part("request") request: RequestBody,
         @Part image: MultipartBody.Part
     ): Response<CommunityPostCreateResponse>
+
+    @GET("api/community/posts")
+    suspend fun getCommunityPosts(): Response<List<CommunityPostListResponse>>
 }

@@ -4,22 +4,26 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.PopupWindow
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodypet.R
 import com.example.foodypet.community.adapter.CommunityPostAdapter
 import com.example.foodypet.community.adapter.MealInfoAdapter
+import com.example.foodypet.community.mapper.CommunityPostMapper
 import com.example.foodypet.community.model.CommunityPost
-import com.example.foodypet.community.model.CommunityPostData
-import com.example.foodypet.community.model.MealInfo
 import com.example.foodypet.databinding.DialogMealInfoBinding
 import com.example.foodypet.databinding.FragmentCommunityBinding
-import android.widget.PopupWindow
 import com.example.foodypet.databinding.ViewCommunityProfileMoreMenuBinding
+import com.example.foodypet.network.RetrofitClient
+import kotlinx.coroutines.launch
 
 class CommunityFragment : Fragment() {
 
@@ -31,7 +35,7 @@ class CommunityFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentCommunityBinding.inflate(inflater, container, false)
         return binding.root
@@ -42,8 +46,15 @@ class CommunityFragment : Fragment() {
 
         initRecyclerView()
         initClickListener()
+        loadCommunityPosts()
+    }
 
-        setCommunityPosts(CommunityPostData.getCommunityPosts())
+    override fun onResume() {
+        super.onResume()
+
+        if (::communityPostAdapter.isInitialized) {
+            loadCommunityPosts()
+        }
     }
 
     private fun initRecyclerView() {
@@ -61,10 +72,10 @@ class CommunityFragment : Fragment() {
                     .commit()
             },
             onOpenMealClick = { post ->
-                showMealInfoDialog()
+                showMealInfoDialog(post)
             },
             onMoreClick = { post ->
-                // TODO: 더보기 클릭 시 처리
+                showFullContent(post)
             },
             onCommentClick = { post ->
                 val commentBottomSheet = CommentBottomSheetFragment()
@@ -78,58 +89,6 @@ class CommunityFragment : Fragment() {
         }
     }
 
-    private fun showPostMoreMenu(post: CommunityPost, anchorView: View) {
-        val menuBinding = ViewCommunityProfileMoreMenuBinding.inflate(layoutInflater)
-
-        val popupWindow = PopupWindow(
-            menuBinding.root,
-            dpToPx(110),
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            true
-        ).apply {
-            isOutsideTouchable = true
-            elevation = dpToPx(4).toFloat()
-            width = dpToPx(110)
-            height = ViewGroup.LayoutParams.WRAP_CONTENT
-        }
-
-        if (post.isMyPost) {
-            menuBinding.menuBlockTv.text = "수정하기"
-            menuBinding.menuAlarmTv.text = "삭제하기"
-            menuBinding.menuAlarmLayout.visibility = View.VISIBLE
-
-            menuBinding.menuBlockLayout.setOnClickListener {
-                popupWindow.dismiss()
-
-                // TODO: 게시글 수정 화면으로 이동
-            }
-
-            menuBinding.menuAlarmLayout.setOnClickListener {
-                popupWindow.dismiss()
-
-                // TODO: 게시글 삭제 처리
-            }
-        } else {
-            menuBinding.menuBlockTv.text = "차단하기"
-            menuBinding.menuAlarmLayout.visibility = View.GONE
-
-            menuBinding.menuBlockLayout.setOnClickListener {
-                popupWindow.dismiss()
-
-                // TODO: 사용자 차단 처리
-            }
-        }
-
-        popupWindow.showAsDropDown(
-            anchorView,
-            -dpToPx(95),
-            dpToPx(6)
-        )
-    }
-
-    private fun dpToPx(dp: Int): Int {
-        return (dp * resources.displayMetrics.density).toInt()
-    }
     private fun initClickListener() {
         binding.communityProfile.setOnClickListener {
             parentFragmentManager.beginTransaction()
@@ -170,7 +129,117 @@ class CommunityFragment : Fragment() {
         }
     }
 
-    private fun showMealInfoDialog() {
+    private fun loadCommunityPosts() {
+        lifecycleScope.launch {
+            try {
+                Log.d("CommunityFragment", "커뮤니티 게시글 목록 조회 요청")
+
+                val response = RetrofitClient.apiService.getCommunityPosts()
+
+                Log.d(
+                    "CommunityFragment",
+                    "커뮤니티 게시글 목록 조회 응답 code=${response.code()}, isSuccessful=${response.isSuccessful}"
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body != null) {
+                        val posts = body.map { responseItem ->
+                            CommunityPostMapper.toModel(responseItem)
+                        }
+
+                        communityPostAdapter.setPosts(posts)
+
+                        Log.d(
+                            "CommunityFragment",
+                            "커뮤니티 게시글 목록 개수=${posts.size}"
+                        )
+                    } else {
+                        communityPostAdapter.setPosts(emptyList())
+
+                        Toast.makeText(
+                            requireContext(),
+                            "게시글 목록 응답이 비어 있습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+
+                    Log.e(
+                        "CommunityFragment",
+                        "커뮤니티 게시글 목록 조회 실패 code=${response.code()}, errorBody=$errorBody"
+                    )
+
+                    Toast.makeText(
+                        requireContext(),
+                        "게시글 목록 조회에 실패했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Log.e("CommunityFragment", "커뮤니티 게시글 목록 조회 통신 오류", e)
+
+                Toast.makeText(
+                    requireContext(),
+                    "서버와 통신 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun showPostMoreMenu(post: CommunityPost, anchorView: View) {
+        val menuBinding = ViewCommunityProfileMoreMenuBinding.inflate(layoutInflater)
+
+        val popupWindow = PopupWindow(
+            menuBinding.root,
+            dpToPx(110),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        ).apply {
+            isOutsideTouchable = true
+            elevation = dpToPx(4).toFloat()
+            width = dpToPx(110)
+            height = ViewGroup.LayoutParams.WRAP_CONTENT
+        }
+
+        if (post.isMyPost) {
+            menuBinding.menuBlockTv.text = "수정하기"
+            menuBinding.menuAlarmTv.text = "삭제하기"
+            menuBinding.menuAlarmLayout.visibility = View.VISIBLE
+
+            menuBinding.menuBlockLayout.setOnClickListener {
+                popupWindow.dismiss()
+
+                // TODO: 게시글 수정 화면으로 이동
+            }
+
+            menuBinding.menuAlarmLayout.setOnClickListener {
+                popupWindow.dismiss()
+
+                // TODO: 게시글 삭제 API 연결
+            }
+        } else {
+            menuBinding.menuBlockTv.text = "차단하기"
+            menuBinding.menuAlarmLayout.visibility = View.GONE
+
+            menuBinding.menuBlockLayout.setOnClickListener {
+                popupWindow.dismiss()
+
+                // TODO: 사용자 차단 API 연결
+            }
+        }
+
+        popupWindow.showAsDropDown(
+            anchorView,
+            -dpToPx(95),
+            dpToPx(6)
+        )
+    }
+
+    private fun showMealInfoDialog(post: CommunityPost) {
         val dialog = Dialog(requireContext())
         val dialogBinding = DialogMealInfoBinding.inflate(layoutInflater)
 
@@ -185,15 +254,7 @@ class CommunityFragment : Fragment() {
             setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
 
-        val mealList = listOf(
-            MealInfo("닭오돌뼈", "10g"),
-            MealInfo("흑돼지 치즈볼", "1봉"),
-            MealInfo("플라그오프", "1개"),
-            MealInfo("어거스트 슈퍼부스트", "10g"),
-            MealInfo("뉴로액트", "10g")
-        )
-
-        val mealInfoAdapter = MealInfoAdapter(mealList)
+        val mealInfoAdapter = MealInfoAdapter(post.meal)
 
         dialogBinding.rvMealItems.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -214,8 +275,16 @@ class CommunityFragment : Fragment() {
         }
     }
 
-    private fun setCommunityPosts(posts: List<CommunityPost>) {
-        communityPostAdapter.setPosts(posts)
+    private fun showFullContent(post: CommunityPost) {
+        Toast.makeText(
+            requireContext(),
+            post.content,
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 
     override fun onDestroyView() {

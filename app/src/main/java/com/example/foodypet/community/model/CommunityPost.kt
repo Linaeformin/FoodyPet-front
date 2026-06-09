@@ -1,18 +1,17 @@
 package com.example.foodypet.community.model
 
-import com.example.foodypet.community.`enum`.CommunityCategory
-
 data class CommunityPost(
-    val id: Int,
-    val profileImageRes: Int,
+    val postId: Long,
+    val profileImageUrl: String?,
     val nickname: String,
-    val category: CommunityCategory,
+    val tag: String,
     val title: String,
+    val imgUrl: String?,
     val content: String,
-    val mealImageRes: Int,
+    val meal: List<MealInfo>,
     var likeCount: Int,
-    val commentCount: Int,
+    var commentCount: Int,
+    val isMyPost: Boolean,
     var isLiked: Boolean = false,
-    var isBookmarked: Boolean = false,
-    val isMyPost: Boolean = false
+    var isBookmarked: Boolean = false
 )

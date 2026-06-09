@@ -10,6 +10,16 @@ class MealInfoAdapter(
     private val mealList: List<MealInfo>
 ) : RecyclerView.Adapter<MealInfoAdapter.MealInfoViewHolder>() {
 
+    inner class MealInfoViewHolder(
+        private val binding: ItemMealInfoBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(mealInfo: MealInfo) {
+            binding.tvFoodName.text = mealInfo.foodName
+            binding.tvFoodAmount.text = mealInfo.amountText
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MealInfoViewHolder {
         val binding = ItemMealInfoBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -23,15 +33,7 @@ class MealInfoAdapter(
         holder.bind(mealList[position])
     }
 
-    override fun getItemCount(): Int = mealList.size
-
-    class MealInfoViewHolder(
-        private val binding: ItemMealInfoBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(item: MealInfo) {
-            binding.tvFoodName.text = item.foodName
-            binding.tvFoodAmount.text = item.amount
-        }
+    override fun getItemCount(): Int {
+        return mealList.size
     }
 }
